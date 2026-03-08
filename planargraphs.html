@@ -1,0 +1,597 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <title>Building Blocks</title>
+</head>
+<body style="font-family: Palatino, Bookman, serif;"  
+  topmargin=50   bottommargin=50   rightmargin=50  leftmargin=50>
+
+<script>
+MathJax = {
+  output: {
+    font: 'mathjax-asana'
+},
+  tex: {
+    inlineMath: {'[+]': [['$', '$']]}
+  },
+  svg: {
+    blacker: 20,          // the stroke-width to use for SVG character paths
+    fontCache: 'global'
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+
+<table>
+<tr>
+<td><img src="general-figs/blocks.jpg" alt="building blocks"></td>
+<td> <h2 style="font-family:Jazz LET, fantasy;">   Building Blocks<br>
+    for<br>
+    Theoretical Computer Science
+    </h2>
+  <br>
+  <h3>Margaret M. Fleck</h3>
+</td>
+</tr>
+</table>
+
+<hr>
+<h1 style="font-family:Jazz LET, fantasy;">
+Chapter 21:  Planar Graphs </h1>
+<hr>
+
+
+
+
+<p>
+This chapter covers special properties of planar graphs.
+
+<h2>21.1 Planar graphs</h2>
+
+<p>
+A planar graph is a graph which 
+can be drawn in the plane without any edges crossing.
+Some pictures of a planar graph might have crossing edges, but
+it's possible to redraw the picture to eliminate the crossings.
+For example,  although the usual pictures of
+$K_4$ and $Q_3$ have crossing edges, it's easy to redraw them
+so that no edges cross.   For example, a planar picture of $Q_3$ is
+shown below.
+However, if you fiddle around with drawings of
+$K_{3,3}$ or $K_5$, there doesn't seem to be any way
+to eliminate the crossings.  We'll see how to prove that
+these two graphs aren't planar.
+
+<figure>
+<img src="planar-figs/planar1.png" alt = "cube graph"   
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 1: The cube graph $Q_3$ drawn in the plane.
+</figcaption>
+</figure>
+
+<p>
+
+Why should we care?  Planar graphs have some interesting mathematical
+properties, e.g. they can be colored with only 4 colors.  Also, as we'll
+see later, we can use facts about planar graphs to show that there are
+only 5 Platonic solids.
+
+<p>
+There are also many practical applications with a graph structure in which
+crossing edges are a nuisance, including
+design problems for circuits, subways, utility lines.
+Two crossing connections normally means that the edges must be run
+at different heights.  This isn't a big issue for electrical wires, but
+it creates extra expense for some types of lines e.g. burying one
+subway tunnel under another (and therefore deeper than you would ordinarily
+need).  Circuits, in particular, are easier to manufacture if their
+connections live in fewer layers.
+
+<h2>21.2 Faces</h2>
+
+<p>
+When a planar graph is drawn with no crossing edges, it
+divides the plane into a set of regions, called
+<b>faces</b>.
+By convention, we
+also count the unbounded area outside the whole graph as one face.
+The <b> boundary</b> of a face is the subgraph containing all the edges
+adjacent to that face and a <b>boundary walk</b>
+is a closed walk containing all of those edges.
+The <b> degree</b> of the face is the minimum length of a boundary walk.
+For example, in the figure below, the lefthand graph has three faces.
+The boundary of face 2 has edges $df, fe, ec, cd$, so this face
+has degree 4. 
+The boundary of face 3 (the unbounded face) has edges
+$bd, df, fe, ec, ca, ab$, so face 3 has degree 6.
+
+<figure>
+<img src="planar-figs/planar2.png" alt = "2-face graph"
+     style="margin:20px 30px" >
+<img src="planar-figs/planar3.png" alt = "3-face graph"   
+     style="margin:20px 30px" >
+<figcaption>
+  Fig. 2: (left) a graph with three faces and (right) a graph with two faces. 
+</figcaption>
+</figure>
+
+<p>
+
+The righthand graph above has a spike edge sticking into the
+middle of face 1.   The boundary of face 1 has edges
+$bf, fe, ec, cd, ca, ab$.   However, any boundary walk must traverse
+the spike twice, e.g. one possible boundary walk is
+$bf, fe, ec, cd, cd, ca, ab$, in which $cd$ is used twice.
+So the degree of face 1 in the righthand graph is 7.
+In such cases, it may help to think of walking along inside the face
+just next to the boundary, rather walking along the boundaries
+themselves.
+Notice that the boundary walk for such a face is not a cycle.
+
+<p>
+Suppose that we have a graph with $e$ edges, $v$ nodes, and $f$
+faces.  We know that the Handshaking theorem holds, i.e.
+the sum of node degrees is $2e$.   
+For planar graphs, we also have a <b> Handshaking theorem for faces</b>:
+the sum of the face degrees is $2e$.
+To see this, notice that a typical edge
+forms part of the boundary of two faces, one to each side of it.
+The exceptions are edges, such as those involved in a spike, that
+appear twice on the boundary of a single face.
+
+<p>
+Finally, for connected
+planar graphs, we have Euler's formula:
+$v - e + f = 2$.   We'll prove that this formula works.
+(You can easily generalize Euler's
+formula to handle graphs with more than one connected components.)
+
+<h2>21.3 Trees</h2>
+
+<p>
+Before we try to prove Euler's formula, let's look at one special type
+of planar graph: free trees.  In graph theory, a <b> free tree</b> is
+any connected graph with no cycles.  Free trees are somewhat like
+normal trees, but they don't have a designated root node and,
+therefore, they don't have a clear ancestor-descendent ordering to
+their notes.
+
+<p>
+A free tree doesn't divide the plane into multiple faces, because it
+doesn't contain any cycles.   A free tree has only
+one face:  the entire plane surrounding it.   So Euler's theorem
+reduces to $v - e = 1$, i.e. $e = v-1$.   Let's prove that this is true, by induction.
+
+<blockquote>
+Proof by induction on the number of nodes in the graph.  
+
+<p>
+Base: If the graph contains no edges and only a single node, the formula 
+is clearly true.
+
+<p>
+Induction: Suppose the formula works for all free trees with up to $n$
+nodes.  Let $T$ be a free tree with $n+1$ nodes.  
+We need to show that $T$ has $n$ edges.
+
+<p>
+Now, we find a node with degree 1 (only one edge going into it).
+To do this start at any node $r$ and follow a walk in any direction,
+without repeating edges.  Because $T$ has no cycles, this walk can't
+return to any node it has already visited.  So it must eventually
+hit a dead end: the node at the end must have degree 1.  Call it $p$.
+
+<p>
+Remove $p$ and the edge coming into it, making a new free tree $T'$ with
+$n$ nodes.  By the inductive hypothesis, $T'$ has $n-1$ edges.  
+Since $T$ has one more edge than $T'$, 
+$T$ has $n$ edges.  Therefore our formula holds for $T$.
+</blockquote>
+
+<h2>21.4 Proof of Euler's formula</h2>
+
+<p>
+We can now prove Euler's formula ($v - e + f = 2$) works in general,
+for any connected planar graph.
+
+<blockquote>
+Proof:  by induction on the number of edges in the graph.
+
+<p>
+Base: If $e=0$, the graph consists of a single node with a single face
+surrounding it.   So we have $1 - 0 + 1 = 2$ which is clearly right.
+
+<p>
+Induction:  Suppose the formula works for all graphs with no more than $n$ edges.
+Let $G$ be a graph with $n+1$ edges.   
+
+<p>
+Case 1: $G$ doesn't contain a cycle.  So $G$ is a free tree and we already know
+the formula works for free trees.
+
+<p>
+Case 2: $G$ contains at least one cycle.   Pick an edge $p$ that's on a cycle.
+Remove $p$ to create a new graph $G'$.   
+
+<p>
+Since the cycle separates the plane into two faces, the faces to either side
+of $p$ must be distinct.   When we remove the edge $p$, we merge these two 
+faces.
+So $G'$ has one fewer faces than $G$.
+
+<p>
+Since $G'$ has $n$ edges, the formula works for $G'$ 
+by the induction hypothesis.  That is $v' - e' + f' = 2$.  But $v' = v$,
+$e' = e -1$, and $f' = f-1$.  Substituting, we find that
+
+$$v - (e-1) + (f-1) = 2$$
+
+<p>
+So 
+
+$$v - e + f = 2$$
+
+</blockquote>
+
+<h2>21.5 Some corollaries of Euler's formula</h2>
+
+
+<p>
+  A <b> corollary</b> is a fact that is easy to prove once you've
+  proved some chunky theorem.   Here are several corollaries of
+  Euler's formula.
+
+<blockquote>
+<b> Corollary 1:</b>
+Suppose $G$ is a connected planar graph, with $v$ nodes, $e$
+edges, and $f$ faces, where $v \ge 3$.  Then $e \le 3v - 6$.
+</blockquote>
+
+
+<blockquote>
+Proof: The sum of the degrees of the faces is equal to twice the
+number of edges.  But each face must have degree $\ge 3$.  So we
+have $3f \le 2e$.
+ 
+<p>
+Euler's formula says that $v - e + f = 2$, so  
+$f = e -v + 2$ and thus $3f = 3e -3v + 6$.
+Combining this with $3f \le 2e$, we get
+$3e -3v + 6 \le 2e$.   
+So $e \le 3v-6$.  
+
+</blockquote>
+
+<p>
+We can also use this formula to show that the graph $K_5$ isn't planar.
+$K_5$ has five nodes and 10 edges. 
+This isn't consistent with the formula $e \le 3v - 6$.
+Unfortunately, this method won't help us with
+$K_{3,3}$, which isn't planar but does satisfy this equation.
+
+<p>
+We can also use this Corollary 1 to derive a useful fact about
+planar graphs:
+
+<blockquote>
+<b> Corollary 2:</b>
+If $G$ is a connected planar graph, $G$ has a node of degree less than six.
+</blockquote>
+
+<blockquote>
+Proof:  This is clearly true if $G$ has one or two nodes.
+
+<p>
+If $G$ has at least three nodes, then   
+suppose that the degree of each node was at least 6.  
+By the handshaking theorem, $2e$ equals
+the sum of the degrees of the nodes, so we 
+would have $2e \ge 6v$.  
+But corollary 1 says that 
+$e \le 3v -6$, so $2e \le 6v -12$.
+We can't have both $2e \ge 6v$ and $2e \le 6v -12$.
+So there must have been a node with degree less than six.
+
+</blockquote>
+
+<p>
+If our graph $G$ isn't connected, the result still holds, because
+we can apply our proof to each connected component individually.
+So we have:
+
+<blockquote>
+<b> Corollary 3:</b>
+If $G$ is a planar graph, $G$ has a node of degree less than six.
+</blockquote>
+
+<h2>21.6 $K_{3,3}$ is not planar</h2>
+
+<p>
+When all the cycles in our graph have at least four nodes, we
+can get a tighter relationship between the numbers of nodes and
+edges.
+
+<blockquote>
+<b> Corollary 4:</b>
+Suppose $G$ is a connected planar graph, with $v$ nodes, $e$
+edges, and $f$ faces, where $v \ge 3$.  and if all cycles in 
+$G$ have length $\ge 4$, then $e \le 2v - 4$.
+</blockquote>
+
+
+<blockquote>
+Proof: The sum of the degrees of the faces is equal to twice the
+number of edges.  But each face must have degree $\ge 4$ because 
+all cycles have length $\ge 4$.
+So we have $4f \le 2e$, so $2f \le e$.
+ 
+<p>
+Euler's formula says that $v - e + f = 2$, so  
+$e -v + 2 = f$, so $2e -2v + 4 = 2f$.
+Combining this with $2f \le e$,
+we get that 
+$2e -2v + 4 \le e$.   So $e \le 2v-4$.  
+
+</blockquote>
+
+<p>
+This result lets us show that $K_{3,3}$ isn't planar.
+All the cycles in $K_{3,3}$ have at least four nodes.  But
+$K_{3,3}$ has 9 edges and 6 nodes, which isn't consistent with
+this formula.   So $K_{3,3}$ can't be planar.
+
+<h2>21.7 Kuratowski's Theorem</h2>
+
+<p>
+The two example non-planar graphs $K_{3,3}$ and $K_5$ weren't picked
+randomly.  It turns out that any non-planar graph must contain a
+subgraph closely related to one of these two graphs.   Specifically,
+we'll say that a graph $G$ is a <b> subdivision </b> of 
+another graph $F$ if the two graphs are isomorphic or if
+the only difference between the graphs is that
+$G$ divides up some of $F$'s edges by adding extra degree 2 nodes
+in the middle of the edges.
+
+<p>
+For example, in the following picture,
+the righthand graph is a subdivision of the lefthand graph.
+
+<figure>
+<img src="planar-figs/planar4.png" alt = "subdivision"   
+     style="margin:20px 20px" >
+<figcaption>
+  Fig. 3: The righthand graph is a subdivision of the lefthand graph.
+</figcaption>
+</figure>
+
+<p>
+We can now state our theorem precisely.
+
+<blockquote>
+<b>Kuratowski's Theorem</b>: A graph is nonplanar if and only if it contains
+a subgraph that is a subdivision of $K_{3,3}$ or $K_5$.
+</blockquote>
+
+<p>
+This was proved in 1930 by Kazimierz Kuratowski, and the proof is apparently somewhat
+difficult.   So we'll just see how to apply it.
+
+<p>
+For example, here's a graph known as the Petersen graph (after a Danish mathematician
+named Julius Petersen).
+
+<figure>
+<img src="planar-figs/planar5.png" alt = "Petersen graph"   
+     style="margin:20px 20px" >
+<figcaption>
+  Fig. 4: The Petersen graph, which isn't planar.
+</figcaption>
+</figure>
+
+<p>
+
+This isn't planar.   The offending subgraph is the whole graph, except for the node $B$
+(and the edges that connect to $B$):
+
+<figure>
+<img src="planar-figs/planar6.png" alt = "non-planar part of Petersen graph"   
+     style="margin:20px 20px" >
+<figcaption>
+  Fig. 5: The part of the Petersen graph that makes it non-planar.
+</figcaption>
+</figure>
+
+
+
+<p>
+This subgraph is a subdivision of $K_{3,3}$.   To see why, first
+notice that the node $b$ is just subdividing the edge from $d$ to $e$, so we can delete it.
+Or, formally, the previous graph is a subdivision of this graph:
+
+<figure>
+<img src="planar-figs/planar7.png" alt = "simplifying 1"   
+     style="margin:20px 20px" >
+<figcaption>
+  Fig. 6: After simplifying one edge.
+</figcaption>
+</figure>
+
+<p>
+
+In the same way, we can remove the nodes $A$ and $C$, to eliminate unnecessary subdivisions:
+
+<figure>
+<img src="planar-figs/planar8.png" alt = "simplifying 2"   
+     style="margin:20px 20px" >
+<figcaption>
+  Fig. 7: After simplifying two more edges.
+</figcaption>
+</figure>
+
+<p>
+
+Now deform the picture a bit and we see that we have $K_{3,3}$.   
+
+<figure>
+<img src="planar-figs/planar9.png" alt = "simplifying 3"   
+     style="margin:20px 20px" >
+<figcaption>
+  Fig. 8: Redrawn to show that it's $K_{3,3}$.
+</figcaption>
+</figure>
+
+
+<h2>21.8 Coloring planar graphs</h2>
+
+<p>
+One application of planar graphs involves coloring maps of countries.
+Two countries sharing
+an extended border must be given different colors.
+(Two regions touching only at a point are allowed to have the same color.)
+We can turn this into a graph coloring problem by assigning a graph
+node to each country. 
+We then connect two nodes with an edge exactly when their regions share
+a border.
+This graph is called the <b> dual</b> of our original map.
+Because the maps are planar, these dual graphs are always planar.
+
+<p>
+Planar graphs can be colored much more easily than other graphs.
+For example, we can prove that they never require more than 6 colors:
+
+<blockquote>
+Proof: by induction on the number of nodes in $G$.
+
+<p>
+Base:  The planar graph with just one node has maximum degree 0 and
+can be colored with one color.
+
+<p>
+Induction: Suppose that any planar graph with $< k$ nodes
+can be colored with 6 colors.
+Let $G$ be a planar graph with $k$ nodes.
+By Corollary 3, $G$ has a node of degree less than 6.
+Let's pick such a node and call it $v$.
+
+<p>
+Remove some node $v$
+(and its edges) from $G$ to create a smaller graph $G'$.
+$G'$ is a planar graph with $k-1$ nodes.  
+So, by the inductive
+hypothesis, $G'$ can be colored with 6 colors.
+
+<p>
+Because $v$ has less than 6 neighbors,
+its neighbors are only using 5 of the available colors.  So
+there is a spare color to assign to $v$, finishing the coloring of $G$.
+</blockquote>
+
+<p>
+It's not hard, but a bit messy, to upgrade this proof to show that
+planar graphs require only five colors.   Four colors is much harder.
+Way back in 1852, Francis
+Guthrie hypothesized that any planar graph could be colored with only
+four colors, but it took 124 years
+to prove that he was right.  Alfred Kempe thought he had proved it in 1879 and
+it took 11 years for another mathematician to find an error in his proof.
+
+<p>
+The <b> Four Color Theorem</b> was finally proved by Kenneth Appel and Wolfgang
+Haken at UIUC in 1976.  They reduced the problem mathematically,
+but were left with 1936 specific graphs that needed to be checked
+exhaustively, using a computer program.    Not everyone was happy
+to have a computer involved in a mathematical proof, but the proof
+has come to be accepted as legitimate.
+
+<h2>21.9 Application: Platonic solids</h2>
+
+<p>
+A fact dating back to the Greeks is that there are only five <b>
+Platonic solids</b>:  cube, dodecahedron, tetrahedron, icosahedron,
+octahedron.
+These are convex polyhedra whose faces all have the
+same number of sides ($k$) and whose nodes all have the same number
+of edges going into them ($d$).
+
+<p>
+
+To turn a Platonic solid into a graph, imagine that it's made of a stretchy material.
+Make a small hole in one face.   Put your fingers into that face and pull sideways,
+stretching that face really big and making the whole thing flat.   For example,
+an octahedron (8 triangular sides) turns into the following graph.  Notice that it still
+has eight faces, one for each face of the original solid, each with three sides.
+
+<figure>
+<img src="planar-figs/planar10.png" alt = "octahedron"   
+     style="margin:20px 20px" >
+<figcaption>
+  Fig. 9: The graph of an octahedron.
+</figcaption>
+</figure>
+
+<p>
+
+Graphs of polyhedra are slightly special planar graphs.  Polyhedra
+aren't allowed to have extra nodes partway along edges, so each
+node in the graph must have degree at least three.  Also, since the
+faces must be flat and the edges straight, each face needs to be
+bounded by at least three edges.  So, if $G$ is the graph of a
+Platonic solid, all the nodes of $G$ must have the same degree $d
+\ge 3$ and all faces must have the same degree $k \ge 3$.
+
+<p>
+Now, let's do some algebra to see why there are so few possibilities
+for the structure of such a graph.
+
+<p>
+By the handshaking theorem, the sum of the node degrees is
+twice the number of edges.  So, since the degrees are equal to $d$, we
+have $dv = 2e$ and therefore
+
+$$v = \frac{2e}{d}$$
+
+<p>
+By the handshaking theorem for faces,
+the sum of the face degrees is also twice
+the number of edges.   That is $kf = 2e$.   So 
+$$f = \frac{2e}{k}$$
+
+<p>
+Euler's formula says that $v - e + f = 2$, so  $v + f = 2 + e > e$.  
+Substituting the above equations into this one, we get:
+
+$$\frac{2e}{d} + \frac{2e}{k} > e $$  
+
+<p>
+Dividing both sides by $2e$:
+
+$$\frac{1}{d} + \frac{1}{k} > \frac{1}{2}$$
+
+<p>
+If we analyze this equation, we discover that $d$ and $k$ can't both be larger than $3$.
+If they were both $4$ or above, 
+the left side of the equation would be $\le \frac{1}{2}$.
+Since we know that $d$ and $k$ are both $\ge 3$, this implies
+that one of the two is
+actually equal to three and the other is some
+integer that is at least 3.
+
+<p>
+Suppose we set $d$ to be 3.  Then the equation becomes
+$\frac{1}{3}+ \frac{1}{k} > \frac{1}{2}$. 
+So $\frac{1}{k} > \frac{1}{6}$, which means that
+$k$ can't be any larger than 5.   
+Similarly, if $k$ is 3, then $d$ can't be any larger than 5.
+
+<p>
+This leaves us only five possibilities for the degrees $d$ and $k$:
+$(3,3)$, $(3,4)$, $(3,5)$, $(4,3)$, and $(5,3)$.
+Each of these corresponds to one of the Platonic solids.
+
+
+</body>
+</html>
+

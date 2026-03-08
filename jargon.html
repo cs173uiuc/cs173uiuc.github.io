@@ -1,0 +1,276 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <title>Building Blocks</title>
+</head>
+<body style="font-family: Palatino, Bookman, serif;"  
+  topmargin=50   bottommargin=50   rightmargin=50  leftmargin=50>
+
+<script>
+MathJax = {
+  output: {
+    font: 'mathjax-asana'
+},
+  tex: {
+    inlineMath: {'[+]': [['$', '$']]}
+  },
+  svg: {
+    blacker: 20,          // the stroke-width to use for SVG character paths
+    fontCache: 'global'
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+
+<table>
+<tr>
+<td><img src="general-figs/blocks.jpg" alt="building blocks"></td>
+<td> <h2 style="font-family:Jazz LET, fantasy;">   Building Blocks<br>
+    for<br>
+    Theoretical Computer Science
+    </h2>
+  <br>
+  <h3>Margaret M. Fleck</h3>
+</td>
+</tr>
+</table>
+
+<hr>
+<h1 style="font-family:Jazz LET, fantasy;">
+Appendix A:  Jargon</h1>
+<hr>
+
+<p>
+Mathematicians write in a dialect of English that differs
+from everyday English and from formal scientific English.
+To read and write mathematics fluently, you need to
+be aware of the differences.
+
+<h2>Strange technical terms</h2>
+
+<p>
+  Many technical terms, abbreviations, and shorthand symbols are easy to
+track down.  Perhaps they belong to an
+obvious topic area.  Perhaps they are used so heavily that no one
+forgets what they mean.  Perhaps they are easily found on Wikipedia.
+But others seem to appear mysteriously out of nowhere.
+
+<dl>
+
+<dt> abuse of notation <dd> The author is using a notation that
+doesn't technically comply with the rules of mathematical writing,
+but is very convenient or conventional.   For example, using ``if'' in a
+a definition where we really mean ``if and only if.''  Or
+writing $f(2,3)$ for the result of applying $f$ to the pair $(2,3)$.
+Strictly we should have written $f((2,3))$, but no one except a
+computer program would ever do that.
+
+<dt> $\exists!$<dd>  This is the unique existence quantifier.   
+$\exists! x, P(x)$ means that there is exactly one $x$
+for which $P(x)$ holds.
+
+<dt>By symmetry <dd>  A variant wording for ``without loss of generality.''
+
+<dt>IH <dd> Inductive hypothesis, as in a proof by induction.
+
+<dt>QED<dd> Short for ``quod erat demonstrandum.''   This is just the
+Latin translation of ``which is what we needed to show.''   
+The Latin and the English versions are both polite ways to tell your
+reader that the proof is finished.
+
+<dt>tuple <dd> A generalization of ``pair,'' ``triple,'' etc to
+larger numbers of items.   A $k$-tuple is an ordered sequence
+of $k$ items.  One occasionally hears ``2-tuple'' in place of
+``pair.''
+
+<dt> NTS <dd> Need to show,  as in ``we need to show that all horses have
+four legs.''
+
+<dt> WLOG, WOLOG, without loss of generality <dd> We're stipulating
+an extra fact or relationship, but claiming that it doesn't actually
+add any new information to the problem.   For example, if we have
+two real variables $x$ and $y$, with identical properties so far,
+it's ok to stipulate that $x \le y$ because we're simply fixing which
+of the two names refers to the smaller number.
+
+</dl>
+
+
+<h2>Odd uses of normal words </h2>
+
+<p>
+In addition to the obvious technical terms (e.g. ``rational number''),
+some words are used rather differently in mathematics than in everyday
+English.
+
+<dl>
+
+<dt>Clearly<dd> See ``obviously.''
+
+<dt>Consider<dd> The author is about to pull an example or constant
+or the like out of thin air.   Typically, this part of the proof
+was constructed backwards, and the reasons for this step will not
+become apparent until later in the proof.
+
+<dt>Distinct <dd> Not equal.   For example, if $x$ and $y$ are
+chosen to be ``distinct elements'' of a set $A$, then $x$ and $y$ 
+aren't allowed to have the same value.
+
+<dt>General <dd> Shorhand for ``general purpose,'' i.e. works
+for all inputs or in all circumstances.
+
+<dt>Graph <dd> Might be a picture showing the relationship between two
+variables, or it might be a diagram with nodes and links between them.
+
+<dt>Obviously <dd> Perhaps it really is obvious.   Or perhaps the
+author didn't feel like working out the details (or forgot them
+in the heat of lecture).   Or, infamously, perhaps he just wants to 
+intimidate the audience.   
+
+<dt>Or <dd>  The connective ``or'' and its variations (e.g. ``either...or'')
+leave open the possibility that both statements are true.
+If a mathematician means to exclude the possibility that both
+are true (``exclusive or''), they say so explicitly.
+In everyday English, you need to use context to determine whether
+an ``or'' was meant to be inclusive or exclusive.
+
+<dt>Has the form <dd> E.g. ``if $x$ is rational, then $x$ has the
+form $\frac{p}{q}$ where $p,q \in \mathbb{Z}$ and $q \not = 0$.
+Means that the definition of this type of object forces the
+object to have this specific internal structure.   
+
+<dt>Plainly <dd> See ``obviously.''
+
+<dt>Proper <dd> For example, ``proper subset'' or ``proper subgraph.''
+Used to exclude the possibility of equality.
+Very similar to ``strict.''
+
+<dt>Recall <dd> The author is about to tell you something basic that
+you probably ought to know, but he realizes that some of you have
+gaps in your background or have forgotten things.   He's trying to
+avoid offending some of the audience by suggesting they don't know
+something so basic, while not embarrassing everyone else by making
+them confess that they don't.
+
+<dt>Similarly <dd>  You can easily fill in these details by
+adapting a previous part of the proof, and you'll just get
+bored if I spell them out.  Occasionally misused
+in a manner similar to ``obviously.''
+
+<dt>Strict <dd>  A ``strict'' relationship is one that excludes
+the possibility of equality.   So ``strictly less than'' means
+that the two items can't be equal.
+A ``strictly increasing'' function never stays on the same value.
+Compare ``proper.''
+
+<dt>Suppose not <dd>  A stereotypical way to start a proof by
+contradiction.  It's shorthand for ``Suppose that the claim
+is not true.''
+
+<dt>Unique <dd> There is only one item with the specified properties.
+``There is a unique real number whose square is zero.''
+
+<dt>Vacuously true <dd>  The claim is true, but only because it's
+impossible to satisfy the hypothesis.   Recall that in math,
+an if/then statement is considered true if its hypothesis is true.
+Vacuously true statements often occur when definitions are applied
+to examples that are very small (e.g. the empty set) or lacking
+some important feature (e.g. a graph with no edges, a function whose
+domain is the empty set).   
+
+<dt>Well-defined <dd> A mathematical object is well-defined if
+its definition isn't buggy.   The term usually appears in a context
+where the definition might look ok at first glance but could
+have a subtle bug.
+
+</dl>
+
+
+<h2>Constructions</h2>
+
+<p>
+Mathematicians also use certain syntactic constructions in ways
+that aren't quite the same as in normal English.   
+
+<dl>
+<dt>If/then statements <dd> An if/then statement with a false
+hypothesis is considered true in mathematics.
+In normal English, such statements are rare and it's not clear
+if they are true, false, or perhaps neither.
+
+<dt>Imperatives <dd> A mathematical construction is often written
+as a recipe that the author and reader are carrying out together.
+E.g. ``We can find a real number $x$ such that $x^2 < 47$.
+The picture behind this is that the author is helping you do the
+mathematics, not doing it by himself while you watch.
+Verbs in the imperative form are sometimes actions
+that the reader should do by himself (e.g. ``prove XX'' on a problem
+set) but sometimes commands that the reader should do by following
+explicit instructions from the author.  E.g. 
+``define $f:\mathbb{N}\rightarrow \mathbb{N}$ by $f(n) = 2n$''
+tells you to define a function, but you are being told exactly
+how to do it.   On a problem set, this would be background information,
+not a question you need to answer.
+
+<dt>Two variables <dd>  If a mathematician sets up two variables
+with different names, e.g. $x$ and $y$, he leaves open the 
+possibility that they might be equal.   If they are intended
+to have different values, they will be explicitly specified as ``distinct.''
+In normal English, 
+giving two things different names suggests very strongly that
+they are different objects.
+
+<dt>No resetting <dd> Do not change the value of a variable in the
+middle of a proof.   Instead, use a fresh variable name.
+For example, suppose you know that $p = 3jk + 1$
+in a proof about divisibility.   To simplify the form of the equation,
+it's tempting to reset $j$ to be three times its original value,
+so that you have $p = jk + 1$.  This isn't done in standard mathematical
+writing.   Instead, use a fresh variable name, e.g. $s = 3j$ and
+then $p = sk + 1$.
+
+Variable names can be re-used when the context changes (e.g. you've
+started a new proof).   When working through a series of examples,
+e.g. a bunch of example functions to be discussed, 
+rotate variable names, so that the new definition appears after
+the reader has had time to forget the old definition.   
+
+<dt>Variable names <dd> Variable names are single-letter, e.g.
+$f$ but not foo.   The letter can be adorned with a wide variety of
+accents, subscripts, and superscripts, however.
+
+</dl>
+
+
+
+<h2> Unexpectedly normal</h2>
+
+Mathematicians are, of course, underlyingly speakers of normal English.
+So, sometimes, they apply the normal rules of conversational English
+even when these aren't part of the formal mathematical system.
+
+
+<dl>
+
+<dt>names of variables <dd> In principle, any letter can be used as the
+name for any variable you need in a proof, with or without accent marks
+of various sorts.   However, there are strong conventions favoring 
+certain names.    E.g. $x$ is a real number, $n$ is an integer, $f$
+is a function, and $T$ is a set.      Observe what names authors use in
+your specific topic area and don't stray too far from their conventions.
+
+<dt>topics of equations <dd>  Proofs are conversations about particular
+objects (e.g. polynomials, summations).    Therefore, equations and
+other statements are often about some specific topic object,
+whose properties are being described.
+When this is the case,
+the topic belongs on the lefthand side, just
+like the subject of a normal sentence.
+
+</dl>
+
+
+</body>
+</html>

@@ -1,0 +1,546 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <title>Building Blocks</title>
+</head>
+<body style="font-family: Palatino, Bookman, serif;"  
+  topmargin=50   bottommargin=50   rightmargin=50  leftmargin=50>
+
+
+<script>
+MathJax = {
+  output: {
+    font: 'mathjax-asana'
+},
+  tex: {
+    inlineMath: {'[+]': [['$', '$']]}
+  },
+  svg: {
+    blacker: 20,          // the stroke-width to use for SVG character paths
+    fontCache: 'global'
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+
+<table>
+<tr>
+<td><img src="general-figs/blocks.jpg" alt="building blocks"></td>
+<td> <h2 style="font-family:Jazz LET, fantasy;">   Building Blocks<br>
+    for<br>
+    Theoretical Computer Science
+    </h2>
+  <br>
+  <h3>Margaret M. Fleck</h3>
+</td>
+</tr>
+</table>
+
+<hr>
+<h1 style="font-family:Jazz LET, fantasy;">
+  Chapter 6: Relations </h1>
+<hr>
+
+
+<p>
+Mathematical relations are an extremely general framework
+for specifying relationships between pairs of objects.
+This chapter surveys the types of relations that can
+be constructed on a single set $A$ and the properties
+pused to characterize different types of relations.
+
+
+<h2>6.1 Relations</h2>
+
+<p>
+A <b> relation</b> $R$ on a set $A$ is 
+a subset of $A \times A$, i.e.
+$R$ is a set of ordered pairs of elements from $A$.
+For simplicity, we will assume that the base set $A$ is
+always non-empty.
+If $R$ contains the pair $(x,y)$, we say that $x$ is related to $y$,
+or $xRy$ in shorthand.
+We'll write $x\not Ry$ to mean that $x$ is not related to $y$.
+
+<p>
+For example, suppose we let $A =\{2, 3, 4, 5, 6, 7, 8\}$.
+We can define a relation $W$ on $A$ by $xWy$ if and only
+if $x \le y \le x+2$.   Then $W$ contains pairs like
+$(3,4)$ and $(4,6)$, but not the pairs $(6,4)$ and $(3,6)$.
+Under this relation, each element of $A$ is related to itself.
+So $W$ also contains pairs like $(5,5)$.
+
+<p>
+We can draw pictures of relations using directed graphs.  We draw
+a graph node for each element of $A$ and we draw 
+an arrow joining each pair of elements that are related.  
+So $W$ looks like:
+
+<figure>
+  <img src="relations-figs/relations1.png" alt="relation W"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 1: Relation W, in which each integer x is related to 
+  x, x+1, and x+2.
+</figcaption>
+</figure>
+
+
+<p>
+In fact, there's very little formal difference between a relation on a
+set $A$ and a directed graph, because graph edges can be represented
+as ordered pairs of endpoints.  They are two ways of describing the
+same situation.
+
+<p>
+We can define another relation $S$ on $A$ by saying that $xSy$ is
+in $S$ if $x \equiv y \pmod{3}$.   Then $S$ would look like:
+
+<figure>
+  <img src="relations-figs/relations2.png" alt="relation S"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 2: Relation S, in which each integer x is related
+  to integers congruent to x mod 3.
+</figcaption>
+</figure>
+
+<p>
+Or, suppose that
+$B = \{2,3,4,5,6,12,25\}$.  Let's set up a relation $T$ on $B$
+such that $xTy$ if $x | y$ and $x \not = y$.   Then
+our picture would look like
+
+<figure>
+  <img src="relations-figs/relations3.png" alt="relation T"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 3: Relation T connects each integer to its multiples (but not
+  itself).
+</figcaption>
+</figure>
+
+<p>
+Mathematical relations can also be used to represent real-world
+relationships, in which case they often have a less regular
+structure.   For example, suppose that we have a set of students
+and student $x$ is related to student $y$ if $x$ nominated $y$
+for ACM president.   The graph of this relation (call it $Q$) 
+might look like:
+
+<figure>
+  <img src="relations-figs/relations4.png" alt="nomination relation"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 4: In relation Q, the nodes are students and the edges show
+  which student nominated which other student(s).  The edges don't have
+  any kind of regular pattern.
+</figcaption>
+</figure>
+
+<p>
+Relations can also be defined on infinite sets or multi-dimensional
+objects.  For example, we can define a relation $Z$ on the real plane
+$\mathbb{R}^2$ in which $(x,y)$ is related to $(p,q)$ if and only if
+$x^2+y^2 = p^2 + q^2$.  In other words, two points are related if they
+are the same distance from the origin.
+
+<p>
+For complex relations, the full directed graph picture can get a bit
+messy.  So there are simplified types of diagrams for certain specific
+special types of relations, e.g. the so-called Hasse diagram for
+partial orders.  
+
+<h2>6.2 Properties of relations: reflexive</h2>
+
+<p>
+Relations are classified by several key properties.   The first is
+whether an element of the set is related to itself or not.   There
+are three cases:
+
+<ul style="list-style-type:none;">
+<li> Reflexive:  every element is related to itself.
+<li> Irreflexive: no element is related to itself.
+<li> Neither reflexive nor irreflexive:  some elements are related
+to themselves but some aren't.
+</ul>
+
+<p>
+
+In our pictures above, elements related to themselves have self-loops.
+So it's easy to see that
+$W$ and $S$ are reflexive,  $T$ is irreflexive,
+and $Q$ is neither.   The familiar relations $\le$ and $=$ on the real numbers
+are reflexive, but $<$ is irreflexive.
+Suppose we define a relation $M$ on the integers by
+$xMy$ if and only if $x + y = 0$.   Then $2$ isn't related
+to itself, but $0$ is.  So $M$ is neither reflexive nor irreflexive.
+
+<p>
+The formal definition states that if $R$ is a relation on a set $A$ then
+
+<ul style="list-style-type:none;">
+<li> $R$ is reflexive if $xRx$ for all
+$x \in A$.  
+<li> $R$ is irreflexive if $x\not Rx$ for all
+$x \in A$.  
+</ul>
+
+
+Notice that irreflexive is not the negation of reflexive.
+The negation of reflexive would be:
+
+<ul style="list-style-type:none;">
+<li> not reflexive: there is an $x \in A, x \not Rx$
+</ul>
+
+<h2>6.3 Symmetric and antisymmetric</h2>
+
+<p>
+Another important property of a relation is whether the order matters
+within each pair.  That is, if $xRy$ is in $R$, is it always the
+case that $yRx$?  If this is true, then
+the relation is called <b> symmetric </b>.
+
+<p>
+In a graph picture of a symmetric relation, a pair of elements is
+either joined by a pair of arrows going in opposite directions, or no
+arrows.  In our examples with pictures above, only $S$ is symmetric.
+
+<p>
+Relations that resemble equality are normally symmetric.  For example,
+the relation $X$ on the integers defined by $xXy$ iff
+$|x| = |y|$ is symmetric.   
+So is the relation $N$ on the real plane defined by
+$(x,y)N(p,q))$ iff $(x-p)^2 + (y-q)^2 \le 25$ (i.e. the
+two points are no more than 5 units apart).
+
+<p>
+Relations that put elements into an order, like $\le$ or divides, have
+a different property called <b> antisymmetry </b>.  A relation is <b>
+antisymmetric </b> if two distinct 
+elements (i.e. not two copies of the same element)
+are never related in both directions.  
+In a graph picture of
+an antisymmetric relation, a pair of points may be joined by a single
+arrow, or not joined at all.  They are never joined by arrows in 
+both directions. In our pictures above, $W$ and $T$ are
+antisymmetric.
+
+<p>
+As with reflexivity, there are mixed relations that have neither
+property.   So the relation $Q$ above is neither symmetric nor
+antisymmetric. 
+
+<p>
+If $R$ is a relation on a set $A$, here's the formal definition of what
+it means for $R$ to be symmetric (which doesn't contain anything
+particularly difficult):
+
+<ul style="list-style-type:none;">
+<li> symmetric: for all $x,y \in A, xRy$ implies $yRx$
+</ul>
+
+<p>
+There's two ways to define antisymmetric.   They are logically equivalent
+and you can pick whichever is more convenient for your purposes:
+
+<ul style="list-style-type:none;">
+<li> antisymmetric:
+for all $x$ and $y$ in $A$ with $x \not = y$, 
+if $xRy$, then $y \not Rx$
+<li> antisymmetric: 
+for all $x$ and $y$ in $A$,
+if $xRy$ and  $yRx$, then $x = y$
+</ul>
+
+<p>
+To interpret the second definition, remember that when mathematicians
+pick two values $x$ and $y$, they leave open the possibility that the
+two values are actually the same.   In normal conversational
+English, if we mention two objects with different names, 
+we normally mean to imply that they are different objects.
+This isn't the case in mathematics.
+I find that the first definition of antisymmetry
+is better for understanding the idea, 
+but the second is more useful for writing proofs.
+
+
+<h2>6.4 Transitive</h2>
+
+<p>
+The final important property of relations is transitivity.
+A relation $R$ on a set $A$ is <b> transitive </b> if
+
+<ul style="list-style-type:none;">
+<li> transitive: for all $a,b,c \in A$, if $aRb$ and $bRc$,
+then $aRc$
+</ul>
+
+As we've seen earlier, transitivity holds for a broad
+range of familiar numerical relations such as $<$, $=$, divides, and
+set inclusion.
+For example, for real numbers, 
+if $x < y$ and $y < z$, then $x < z$.
+Similarly, if $x | y$ and $y | z$, then $x | z$.
+For sets, $X \subseteq Y$ and $Y \subseteq Z$ implies that 
+$X \subseteq Z$.
+
+<p>
+If we look at graph pictures, transitivity means that whenever there
+is an indirect path from $x$ to $y$ then there must also
+be a direct arrow from $x$
+to $y$.   This is true for $S$ and $B$ above, but not for $W$ or $Q$.
+
+<p>
+We can also understand this by spelling out what it means for a relation
+$R$ on a set $A$ not to be transitive:
+
+<ul style="list-style-type:none;">
+<li> not transitive:  there are $a,b,c \in A, 
+aRb \text{ and } bRc \text{ and }
+a \not Rc$
+</ul>
+
+<p>
+So, to show that a relation is not transitive, we need to find one
+counter-example, i.e. 
+specific elements $a$, $b$, and $c$ such
+that $aRb$ and $bRc$ but not $aRc$.
+In the graph of a non-transitive relation, you can find
+a subsection that looks like:
+
+<figure>
+  <img src="relations-figs/relations5.png" alt="non-transitive relation"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 5: a graph isn't transitive if it contains a section like this, with a
+  multi-step path from a to c but no direct link.
+</figcaption>
+</figure>
+
+
+<p>
+It could be that $a$ and $c$ are actually the same element, in which case
+the offending subgraph might look like:
+
+<figure>
+  <img src="relations-figs/relations6.png"  alt="sneaky non-transitive relation"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 6: a sneaky type of non-transitivity, where two of the three nodes 
+  mentioned in the definition of transitive are the same node.
+</figcaption>
+</figure>
+
+
+<p>
+The problem here is that if $aRb$ and $bRa$, then transitivity would
+imply that $aRa$ and $bRb$.
+
+<p>
+One subtle 
+point about transitive is that it's an if/then statement.
+So it's ok if some sets of elements just aren't connected at all.
+For example, this subgraph is consistent with the relation being
+transitive.
+
+<figure>
+  <img src="relations-figs/relations7.png" alt="sneaky transitive relation"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 7: This graph count as transitive, because it doesn't contain any multi-step
+  paths that would match against the hypothesis of the transitivity definition.
+</figcaption>
+</figure>
+
+
+<p>
+A disgustingly counter-intuitive special case is the relation
+in which
+absolutely no elements are related, i.e. no arrows at all in
+the graph picture. 
+This relation is transitive.
+it's never possible to satisfy the hypothesis of the definition of
+transitive.   It's also symmetric, for the same reason.   
+And, oddly enough, antisymmetric.   
+All of these properties hold via vacuous truth.
+
+<p>
+Vacuous truth doesn't apply to reflexive and irreflexive, because
+they are unconditional
+requirements, not if/then statements.  
+So this empty relation
+is irreflexive and not reflexive.   
+
+<h2>6.5 Types of relations</h2>
+
+<p>
+Now that we have these basic properties defined, we can define some
+important types of relations.    Three of these are ordering relations:
+
+<ul style="list-style-type:none;">
+<li> A <b> partial order </b> is a relation that is reflexive,
+antisymmetric, and transitive.  
+<li> A <b> linear order</b> (also called a total order) is a
+partial order R in which every pair of elements are <b> comparable</b>.
+That is, for any two elements $x$ and $y$, either
+$xRy$ or $yRx$.
+<li> A <b> strict partial order </b> is a
+relation that is irreflexive, antisymmetric, and transitive.
+</ul>
+
+<p>
+Linear orders are all very similar to 
+the normal $\le$ ordering on the real numbers or integers.  
+Partial orders differ from linear orders, in that
+there are some pairs of elements which
+aren't ordered with respect to each other.  For example, the divides
+relation on the integers is a partial order but not a linear order,
+because it doesn't relate some pairs of integers in either direction.
+For example, 5 doesn't divide 7, but neither does 7 divide 5.
+A strict partial order is just like a partial order, except that objects
+are not related to themselves.   For example, the relation $T$ at the
+start of this chapter is a strict partial order.  
+
+<p>
+The fourth type of relation is an equivalence relation:
+
+<blockquote>
+Definition: An <b> equivalence relation</b> 
+is a relation that is reflexive, symmetric,  and transitive.
+</blockquote>
+
+<p>
+These three properties create a well-behaved notation of equivalence
+or congruence for a set of objects, like congruence mod $k$ on the set
+of integers.  In particular, if $R$ is an equivalence relation on a
+set $A$ and $x$ is an element of $A$, we can define
+the <b> equivalence class of x</b> to be the set of all elements
+related to $x$.   That is
+
+$$[x]_R = \{y \in A \mid xRy\}$$
+
+<p>
+When the relation is clear from the context (as when we discussed
+congruence mod $k$), we frequently omit the subscript on the square
+brackets.
+
+<p>
+For example, we saw the relation $Z$ on the real plane
+$\mathbb{R}^2$, where $(x,y)Z(p,q)$ if and only if
+$x^2+y^2 = p^2 + q^2$.  Then $[(0,1)]_Z$ contains all
+the points related to $(0,1)$, i.e. the unit circle.
+
+
+<h2>6.6 Proving that a relation is an equivalence relation</h2>
+
+<p>
+Let's see how to prove that a new relation is an equivalence relation.
+These proofs are usually very mechanical.
+For example, let $F$ be the set of all fractions, i.e.
+
+$$F = \{\frac{p}{q} \mid p,q \in \mathbb{Z} \text{ and } q \not = 0\}$$
+
+<p>
+Fractions aren't the same thing as rational numbers, because
+each rational number is represented by many fractions.   We
+consider two fractions to be equivalent, i.e. represent the
+same rational number, if $xq = yp$.  So, we have an equivalence
+relation $\sim$ defined by:
+$\frac{x}{y}\sim \frac{p}{q}$ if and only if $xq = yp$.
+
+<p>
+Let's show that $\sim$ is an equivalence relation.
+
+<blockquote>
+Proof: Reflexive:  For any $x$ and $y$, $xy = xy$.  So the definition
+of $\sim$ implies that $\frac{x}{y}\sim \frac{x}{y}$.
+
+<p>
+Symmetric: if
+$\frac{x}{y}\sim \frac{p}{q}$ then $xq = yp$, 
+so $yp = xq$, so $py = qx$, which implies that 
+$\frac{p}{q}\sim \frac{x}{y}$.
+
+<p>
+Transitive:  Suppose that
+$\frac{x}{y}\sim \frac{p}{q}$ and 
+$\frac{p}{q}\sim \frac{s}{t}$.  By the definition of $\sim$,
+$xq = yp$ and $pt = qs$.   So 
+$xqt = ypt$ and $pty = qsy$. 
+Since $ypt = pty$, this means that $xqt = qsy$.
+Cancelling out the $q$'s, we get $xt = sy$.
+By the definition of $\sim$, this means that 
+$\frac{x}{y}\sim \frac{s}{t}$.
+
+<p>
+Since $\sim$ is reflexive, symmetric, and transitive, it is an equivalence
+relation.
+</blockquote>
+
+
+
+<p>
+Notice that the proof has three sub-parts, each showing one of the
+key properties.   Each part involves using the definition of the
+relation, plus a small amount of basic math.
+The reflexive case is very short.   The symmetric
+case is often short as well.   Most of the work is in the transitive
+case.  
+
+
+<h2>6.7 Proving antisymmetry</h2>
+
+<p>
+Here's another example of a relation, this time an order (not an
+equivalence) relation.  Consider the set of intervals on the real line
+$J = \{(a,b) \mid a,b\in \mathbb{R} \text{ and } a < b\}$.  Define
+the containment relation $C$ as follows:
+
+<blockquote>
+$(a,b)\ C\ (c,d)$ if and only if $a \le c$ and $d \le b$
+</blockquote>
+
+<p>
+To show that $C$ is a partial order, we'd need to show that it's
+reflexive, antisymmetric, and transitive.   We've seen how to
+prove two of these properties.   Let's see how to do a proof of
+antisymmetry.
+
+<p>
+For proving antisymmetry, it's typically easiest to use this form of
+the definition of antisymmetry: if $xRy$ and $yRx$, then $x=y$.
+Notice that $C$ is a relation on intervals, i.e. pairs of numbers, not
+single numbers.  Substituting the definition of $C$ into the
+definition of antisymmetry,  we need to show that
+
+
+<blockquote>
+For any intervals $(a,b)$ and $(c,d)$,
+if $(a,b)\ C\
+(c,d)$ and $(c,d)\ C\ (a,b)$, then $(a,b) = (c,d)$.
+</blockquote>
+
+<p>
+So, suppose that we have two intervals $(a,b)$ and $(c,d)$ such that
+$(a,b)\ C\ (c,d)$ and $(c,d)\ C\ (a,b)$.  By the definition of $C$,
+$(a,b)\ C\ (c,d)$ implies that $a \le c$ and $d \le b$.  Similarly,
+$(c,d)\ C\ (a,b)$ implies that $c \le a$ and $b \le d$.
+
+<p>
+Since $a \le c$ and $c \le a$, $a = c$. 
+Since $d \le b$ and $b \le d$, $b = d$. 
+So $(a,b) = (c,d)$.
+
+
+</body>
+</html>
+
+
+
+
+
+

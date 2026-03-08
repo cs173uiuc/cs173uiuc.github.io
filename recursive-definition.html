@@ -1,0 +1,465 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <title>Building Blocks</title>
+</head>
+<body style="font-family: Palatino, Bookman, serif;"  
+  topmargin=50   bottommargin=50   rightmargin=50  leftmargin=50>
+
+<script>
+MathJax = {
+  output: {
+    font: 'mathjax-asana'
+},
+  tex: {
+    inlineMath: {'[+]': [['$', '$']]}
+  },
+  svg: {
+    blacker: 20,          // the stroke-width to use for SVG character paths
+    fontCache: 'global'
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+
+<table>
+<tr>
+<td><img src="general-figs/blocks.jpg" alt="building blocks"></td>
+<td> <h2 style="font-family:Jazz LET, fantasy;">   Building Blocks<br>
+    for<br>
+    Theoretical Computer Science
+    </h2>
+  <br>
+  <h3>Margaret M. Fleck</h3>
+</td>
+</tr>
+</table>
+
+<hr>
+<h1 style="font-family:Jazz LET, fantasy;">
+Chapter 13: Recursive Definition </h1>
+<hr>
+
+
+<p>
+This chapter covers recursive definition, including
+finding closed forms.
+
+<h2>13.1 Recursive definitions</h2>
+
+<p>
+Thus far, we have defined objects of variable length using 
+semi-formal definitions involving $\ldots$.   
+For example, we defined the summation $\sum_{i=1}^n \ i$
+by
+
+$$\sum_{i=1}^n \ i = 1 + 2 + 3 + \ldots + (n-1) + n$$
+
+<p>
+This method is only ok when the reader can easily see what regular
+pattern the $\ldots$ is trying to express.   When precision is
+essential, e.g. when the pattern is less obvious, we need
+to switch to ``recursive definitions.''
+
+<p>
+Recursive function definitions in mathematics are basically
+similar to recursive procedures in programming languages.
+A recursive definition defines an object in terms of smaller
+objects of the same type.   Because this process has to end
+at some point, we need to include explicit definitions for
+the smallest objects.   So a recursive definition always has
+two parts:
+
+<ul>
+<li> Base case or cases
+<li> Recursive formula
+</ul>
+
+<p>
+For example, the summation $\sum_{i=1}^n \ i$ can be
+defined as:
+
+<ul>
+<li> $g(1) = 1$
+<li> $g(n) = g(n-1) + n$, for all $n \ge 2$
+</ul>
+
+<p>
+Both the base case and the recursive formula must be present
+to have a complete definition.
+However, it is traditional not to explicitly label these two
+pieces.   You're just expected to figure out for yourself which 
+parts are base case(s) and which is the recursive formula.
+The input values are normally assumed to be integers.
+
+<p>
+The true power of recursive definition is revealed when the result for
+$n$ depends on the results for more than one smaller value, as in the
+strong induction examples.  For example, the famous Fibonacci numbers
+are defined:
+
+<ul>
+<li> $F_0 = 0$
+<li>  $F_1 = 1$
+<li> $F_i = F_{i-1} + F_{i-2}$, &nbsp;&nbsp;  $\forall i \ge 2$ 
+</ul>
+
+<p>
+So $F_2 = 1$, $F_3 = 2$, $F_4 = 3$, $F_5 = 5$, $F_6 = 8$, 
+$F_7 = 13$, $F_8 = 21$, $F_9 = 34$.
+It isn't at all obvious how to express this pattern non-recursively.
+
+
+<h2>13.2 Finding closed forms</h2>
+
+<p>
+Many recursive numerical formulas have a closed form, i.e.  an equivalent
+expression that doesn't involve recursion (or summation or the like).
+Sometimes you can find the closed form by working out the first few
+values of the function and then guessing the pattern.  More often, you
+need to use an organized technique.
+The simplest technique for finding closed forms is called ``unrolling.''
+
+<p>
+For example, suppose we have a function $T:\mathbb{N}
+\rightarrow \mathbb{Z}$ defined by
+
+\begin{eqnarray*}
+T(1) &=& 1 \\
+T(n) &=& 2T(n-1) + 3, \ \ \ \ \forall n \ge 2
+\end{eqnarray*}
+
+<p>
+The values of this function are $T(1) = 1$, $T(2) = 5$,
+$T(3) = 13$, $T(4)= 29$, $T(5) = 61$.  It isn't so obvious what the pattern is.
+
+<p>
+The idea behind unrolling is to substitute a recursive definition into itself,
+so as to re-express $T(n)$ in terms of $T(n-2)$ rather than $T(n-1)$.
+We keep doing this, expressing $T(n)$ in terms of the value of $T$
+for smaller and smaller inputs, until we can see the pattern required
+to express $T(n)$ in terms of $n$ and $T(0)$.
+So, for our example function, we would compute:
+
+
+\begin{eqnarray*}
+T(n) &= & 2T(n-1) + 3 \\
+     &= & 2(2T(n-2) + 3) + 3 \\
+     &= & 2(2(2T(n-3) + 3) + 3) + 3 \\
+     &= & 2^3T(n-3) + 2^2\cdot 3 + 2\cdot 3 + 3 \\
+     &= & 2^4T(n-4) + 2^3\cdot 3 + 2^2\cdot 3 + 2\cdot 3 + 3 \\
+     &\ldots & \\
+     &= & 2^kT(n-k) + 2^{k-1}\cdot 3 + \ldots + 2^2\cdot 3 + 2\cdot 3 + 3 \\
+\end{eqnarray*}
+
+<p>
+The first few lines of this are mechanical substitution.   To get
+to the last line, you have to imagine what the pattern looks like
+after $k$ substitutions.
+
+<p>
+We can use summation notation to compactly represent the
+result of the $k$th unrolling step:
+
+\begin{eqnarray*}
+T(n) &= & 2^kT(n-k) + 2^{k-1}\cdot 3 + \ldots + 2^2\cdot 3 + 2\cdot 3 + 3 \\
+     &= & 2^kT(n-k) + 3(2^{k-1} + \ldots + 2^2 + 2 + 1) \\
+     &= & 2^kT(n-k) + 3\sum_{i=0}^{k-1}(2^i) 
+\end{eqnarray*}
+
+<p>
+Now, we need to determine when the input to $T$ will hit the base
+case.  In our example, the input value is $n-k$ and the base case is
+for an input of 1.  So we hit the base case when $n-k =
+1$. i.e. when $k = n-1$.  Substituting this value for $k$ back into our
+equation, and using the fact that $T(1) = 1$, we get
+
+\begin{eqnarray*}
+T(n) &=& 2^kT(n-k) + 3 \sum_{i=0}^{k-1}(2^i) \\
+     &=& 2^{n-1}T(1) + 3\sum_{i=0}^{n-2}(2^i) \\
+     &=&2^{n-1} + 3\sum_{k=0}^{n-2}(2^k) \\
+      &=& 2^{n-1} + 3 (2^{n-1} - 1)
+     =4(2^{n-1}) -3
+  =2^{n+1} -3
+\end{eqnarray*}
+
+<p>
+So the closed form for this function is $T(n) =2^{n+1} -3$.
+The unrolling process isn't a formal proof that our closed
+form is correct.  However, we'll see below how to write
+a formal proof using induction.
+
+<h2>13.3 Divide and conquer</h2>
+
+<p>
+Many important algorithms in computer science
+involve dividing a big problem of (integer) size $n$ 
+into $a$ sub-problems, each of size $n/b$.   This general method is
+called ``divide and conquer.''  Analyzing such algorithms
+involves recursive definitions that look like:
+
+\begin{eqnarray*}
+S(1) &=& c \\
+S(n) &=& aS(\lceil n/b \rceil) + f(n), \ \ \ \ \forall n \ge 2
+\end{eqnarray*}
+
+<p>
+The base case takes some constant amount of work $c$.
+The term $f(n)$ is the work involved in dividing up the big problem
+and/or merging together the solutions for the smaller problems.
+The call to the ceiling function is required to ensure that
+the input to $S$ is always an integer.
+
+<p>
+Handling such definitions in full generality is beyond the scope of
+this class.  (See any algorithms text for more details.)  So
+let's consider a particularly important special case: dividing our
+problem into two half-size problems, where the dividing/merging takes
+time proportional to the size of the problem.  And let's also 
+restrict our input $n$ to be a power of two, so that we don't need
+to use the ceiling function.   We then
+get a recursive definition that looks like:
+
+\begin{eqnarray*}
+S(1) &=& c \\
+S(n) &=& 2S(n/2) + n, \ \ \ \ \forall n \ge 2\ \ \text{($n$ a power of 2)} 
+\end{eqnarray*}
+
+<p>
+Unrolling this, we get
+
+\begin{eqnarray*}
+S(n) &= & 2S(n/2) + n \\
+     &= & 2(2S(n/4) + n/2) + n \\
+     &= & 4S(n/4) + n + n \\
+     &= & 8S(n/8) + n + n + n \\
+     &\ldots & \\
+     &= & 2^iS(\frac{n}{2^i}) + in
+\end{eqnarray*}
+
+<p>
+We hit the base case when
+$\frac{n}{2^i} = 1$ i.e. when $i = \log n$ (i.e. log base 2, which is
+the normal convention for algorithms applications).
+Substituting in this value for $i$ and the base case value
+$S(1) = c$, we get
+
+$$S(n) =  2^iS(\frac{n}{2^i}) + in
+       = 2^{\log n}c + n\log n
+       = cn + n\log n$$
+
+<p>
+So the closed form for $S(n)$ is $cn + n\log n$.
+
+<p>
+In real applications, our input $n$ might not be a power of 2, so
+our actual recurrence might look like:
+
+\begin{eqnarray*}
+S(1) &=& c \\
+S(n) &=& 2S(\lceil n/2 \rceil) + n, \ \ \ \ \forall n \ge 2 
+\end{eqnarray*}
+
+<p>
+We could extend the details of our analysis to handle the 
+input values that aren't powers of 2.   In many practical contexts, however, we are
+only interested in the overall shape of the function, e.g. is
+it roughly linear? cubic? exponential?  
+So it is often sufficient to note that $S$ is increasing, so
+values of $S$ for inputs that aren't powers of 2 will 
+lie between the values of $S$ at the adjacent powers of 2.
+
+<h2>13.4 Hypercubes</h2>
+
+<p>
+Non-numerical objects can also be defined recursively.
+For example, the hypercube $Q_n$ is the 
+graph of the corners and edges of an $n$-dimensional
+cube.   It is defined recursively as follows (for any $n \in \mathbb{N}$):
+
+<ul>
+<li> $Q_0$ is a single node with no edges
+<li> $Q_n$ consists of two copies of $Q_{n-1}$ with edges joining corresponding
+nodes, for any $n \ge 1$.
+</ul>
+
+<p>
+That is, each node $v_i$ in one copy of $Q_{n-1}$ is joined by an edge to its
+clone copy $v'_i$ in the second copy of $Q_{n-1}$.   $Q_0$, $Q_1$, $Q_2$, and
+$Q_3$ look as follows.   The node labels distinguish the two copies of $Q{n-1}$
+
+<figure>
+<img src="recursive-figs/recursive1.png" alt = "hypercube graphs"   
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 1: The first four hypercubes $Q_0$, $Q_1$, $Q_2$, $Q_3$, 
+</figcaption>
+</figure>
+
+<p>
+
+The hypercube defines a binary coordinate system.
+To build this coordinate system, 
+we label nodes with binary numbers,
+where each binary digit corresponds to the value of one coordinate.
+The edges connect nodes that differ in exactly one coordinate.
+
+<figure>
+<img src="recursive-figs/recursive2.png" alt = "hypercube coordinates"   
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 2: Coordinates for naming the nodes of a hypercube.
+</figcaption>
+</figure>
+
+
+
+<p>
+$Q^n$ has $2^n$ nodes.   To compute the number of edges, we set up
+the following recursive definition for the number of edges $E(n)$ in the
+$Q_n$:
+
+<ul>
+<li> $E(0) = 0$
+<li> $E(n) = 2E(n-1) + 2^{n-1}$, for all $n \ge 1$
+</ul>
+
+<p>
+The $2^{n-1}$ term is the number of nodes in each copy of $Q^{n-1}$, i.e.
+the number of edges required to join corresponding nodes.
+We'll leave it as an exercise to find a closed form for this 
+recursive definition.
+
+<h2>13.5 Proofs with recursive definitions</h2>
+
+<p>
+Recursive definitions are ideally suited to inductive proofs.
+The main outline of the proof often mirrors the structure of
+the recursive definition.   For example, let's prove the following claim
+about the Fibonacci numbers:
+
+<blockquote>
+  <b> Claim 1</b>:
+    For any $n \ge 0$, $F_{3n}$ is even.
+</blockquote>
+
+<p>
+Let's check some concrete values:  $F_0 = 0$, 
+$F_3 = 2$, $F_6 = 8$, $F_9 = 34$.  All are even.   Claim looks good.
+So, let's build an inductive proof:
+
+<blockquote>
+Proof:  by induction on $n$.
+
+<p>
+Base: $F_0 = 0$, which is even. 
+
+<p>
+Induction:  Suppose that $F_{3n}$ is even for
+$n=0,1,\ldots,k$.  We need to show that
+$F_{3k}$ is even.   We need to show that
+that $F_{3(k+1)}$ is even.   
+
+<p>
+$F_{3(k+1)} = F_{3k+3} = F_{3k+2} + F_{3k+1}$
+
+<p>
+But $F_{3k+2} = F_{3k+1} + F_{3k}$.  So, substituting into the above
+equation, we get:
+
+<p>
+$F_{3(k+1)} = (F_{3k+1} + F_{3k}) + F_{3k+1} = 2F_{3k+1} + F_{3k}$
+
+<p>
+By the inductive hypothesis $F_{3k}$ is even.  $2F_{3k+1}$ is even
+because it's 2 times an integer.   So their sum must be even.
+So $F_{3(k+1)}$ is even, which is what we needed to show.
+
+</blockquote>
+
+<p>
+Some people feel a bit uncertain if the base case is a special case
+like zero.   It's ok to also include a second base case.  For this
+proof, you would check the case for $n=1$ i.e. verify that
+$F_3$ is even.  The extra base case isn't necessary for a complete
+proof, but it doesn't cause any harm and may help the reader.
+
+
+<h2>13.6 Inductive definition and strong induction</h2>
+
+<p>
+Claims involving recursive definitions often require proofs using
+a strong inductive hypothesis.
+For example, suppose that the
+function $f:\mathbb{N} \rightarrow \mathbb{Z}$ is defined by
+
+<ul>
+<li> $f(0) = 2$
+<li> $f(1) = 3$
+<li> $\forall n \geq 1$, $f(n+1) = 3f(n) - 2f(n-1)$
+</ul>
+
+<p>
+I claim that:
+
+<blockquote>
+  <b> Claim 2</b>:
+$\forall n \in \mathbb{N}, f(n) = 2^n + 1$
+</blockquote>
+
+<p>
+We can prove this claim as follows:
+
+<blockquote>
+Proof:  by induction on $n$.
+
+<p>
+Base:  $f(0)$  is defined to be 2.   $2^0 + 1 = 1 + 1 = 2$.
+So $f(n) = 2^n + 1$ when $n = 0$.
+
+<p>
+   $f(1)$  is defined to be 3.   $2^1 + 1 = 2 + 1 = 3$.
+So $f(n) = 2^n + 1$ when $n = 1$.
+
+<p>
+Induction:   Suppose that $f(n) = 2^n + 1$ for $n=0,1,\ldots, k$.
+
+<p>
+$f(k+1) = 3f(k) - 2f(k-1)$   
+
+<p>
+By the induction hypothesis, $f(k) = 2^k + 1$ and
+$f(k-1) = 2^{k-1} + 1$.   Substituting these formulas into
+the previous equation, we get:
+
+<p>
+$f(k+1) = 3(2^k + 1) - 2(2^{k-1} + 1) = 3\cdot2^k + 3 - 2^k - 2 = 2\cdot 2^k + 1 = 2^{k+1} + 1$
+
+<p>
+So $f(k+1) = 2^{k+1} + 1$, which is what we needed to show.
+</blockquote>
+
+<p>
+We need to use a strong induction hypothesis, as well as two base cases,
+because the inductive
+step uses the fact that the formula holds for two previous values of $n$
+($k$ and $k-1$).   
+
+
+<h2>13.7 Variation in notation</h2>
+
+<p>
+Recursive definitions are sometimes called inductive definitions
+or (especially for numerical functions) recurrence relations.
+Folks who call them ``recurrence relations'' typically
+use the term ``initial condition'' to refer to the base case.
+
+
+
+
+</body>
+</html>
+
+

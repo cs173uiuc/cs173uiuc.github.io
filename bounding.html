@@ -1,0 +1,470 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <title>Building Blocks</title>
+</head>
+<body style="font-family: Palatino, Bookman, serif;"  
+  topmargin=50   bottommargin=50   rightmargin=50  leftmargin=50>
+
+<script>
+MathJax = {
+  output: {
+    font: 'mathjax-asana'
+},
+  tex: {
+    inlineMath: {'[+]': [['$', '$']]}
+  },
+  svg: {
+    blacker: 20,          // the stroke-width to use for SVG character paths
+    fontCache: 'global'
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+
+<table>
+<tr>
+<td><img src="general-figs/blocks.jpg" alt="building blocks"></td>
+<td> <h2 style="font-family:Jazz LET, fantasy;">   Building Blocks<br>
+    for<br>
+    Theoretical Computer Science
+    </h2>
+  <br>
+  <h3>Margaret M. Fleck</h3>
+</td>
+</tr>
+</table>
+
+<hr>
+<h1 style="font-family:Jazz LET, fantasy;">
+Chapter 11: Two-way Bounding </h1>
+<hr>
+
+<p>
+In high school and early college mathematics, 
+we are often proving equalities and we often prove them
+by manipulating a sequence of equalities.   For example
+
+$$\frac{3x^2 - 5x -2}{x-2} 
+= \frac{(x-2)(3x+1)}{x-2} = 3x + 1$$
+
+<p>
+On more complex problems, it's often necessary to adopt
+a more flexible approach:   bound the quantity of
+interest from both directions.  
+When our best upper and lower bounds are equal, we've
+established an equality.   Otherwise, we've limited
+the quantity to a known (hopefully small) range.
+
+<p>
+Because we need to establish a lower bound and also an upper bound, a
+2-way bounding proof contains two sub-proofs.  Sometimes the two sub-proofs
+are similar.  However, the true power of the technique comes from the
+fact that the two sub-proofs can use entirely different techniques.
+Therefore, the method is widely used when proving more difficult
+results, e.g. in upper-level computer science and mathematics courses
+(e.g. real analysis, algorithms).
+
+<p>
+The most common error building these proofs is to omit one half
+entirely.  For example, someone intending to show that $f(x) = k$
+might prove that $f(x) \le k$ but forget to also prove that $f(x) \ge
+k$.  Do not do this.   If one of the bounds is obvious, say that
+explicitly.
+In this chapter, we will see how this method works on
+a variety of examples.   
+
+<h2>11.1 Marker Making</h2>
+
+<p>
+Suppose that we have a 12'' by 15'' sheet of cookie dough, from which we'd
+like to cut maple-leaf cookies.
+Scraps of dough that have been reclaimed and re-rolled never produce
+results as nice as those from the original sheet, so we'd like to pack
+as many cookies into our original sheet as possible.
+How many cookies can we cut from this sheet?
+
+<p>
+We could experiment with cutting several sheets of dough, placing our
+cookie cutters in various different ways.
+Suppose we managed to fit in 25 cookies on our best attempt.
+We now know that 25  is a lower bound 
+on the maximum number
+of cookies we can cut out.    But it might be very hard to prove
+we've found the best layout.
+
+<p>
+Now, suppose that we put our maple-leaf cutters onto graph paper and work
+out that the area of 
+each cookie is at least 6 square inches.   Since our
+sheet of dough has area 180 square inches, we know that it's impossible to cut
+out more than 30 cookies.   So we now have an upper bound of 30 on the
+number of cookies in the optimal layout.
+In this example, we would normally expect our lower bound and
+our upper bound to be some distance apart, because it's so difficult
+to search through all the ways to arrange our cutters.
+
+<p>
+Home kitchens do not need to worry heavily about efficiency, but
+industrial plants do.   In particular, clothing manufacturers
+need to create <b>markers</b> for cutting clothing parts out
+of rectangles of cloth.   
+Because the appearance and material properties of cloth are tied to its
+warp direction, parts must be lined up in specific orientations.
+Scrap cloth, though recyclable for other purposes, cannot simply be reformed and re-used.
+Efficient markers are important, because 
+any waste will be replicated many times, but difficult for humans to create.
+So considerable effort has gone into the development of efficient marker
+making algorithms.
+
+<p>
+In both engineering and in theoretical computer science, it is common to
+encounter quantities that cannot be calculated directly but, rather,
+must be bounded from above and below.   
+Sometimes we can make the upper and lower bounds
+meet, giving us a so-called <b> tight</b> bound.   Often, we can't.
+
+<h2>11.2 Pigeonhole point placement</h2>
+
+<p>
+Here's a problem of a very different sort, which uses 2-way bounding
+toegether with the pigeonhole principle.
+Like so many pigeonhole proofs, the proof depends on a non-obvious 
+trick.  In this case, it's a trick about dividing up a triangle.   
+Once you've seen the trick, however, the proof is a classic
+example of bounding a quantity from above and below.
+
+<blockquote>
+  <b>Claim 1: </b>
+  Suppose that $T$ is an equilateral triangle with sides of length 2 units
+We can place a maximum of four points in the triangle such that
+every pair of points are more than 1 unit apart.
+</blockquote>
+
+<p>
+To show that 4 is the maximum number of points we can place
+with the required separations,
+we need to show that it's possible to place 4 points, but it is not
+possible to place 5 points.   It's easiest to tackle these two sub-problems
+separately, using different techniques.
+
+<blockquote>
+Proof: To show that the maximum is at least four, notice that we can place three
+points at the corners of the triangle and one point in the center.
+The points at the corners are two units apart.   To see that the point
+in the center is more than one unit from any corner, notice that the
+center, the corner, and the midpoint of the side form a right triangle.
+
+<figure>
+<img src="bounding-figs/bounding1.png" alt = "triangle details"   
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 1: A right triangle defined by the center of the equilaterial triangle,
+  the center of one edge, and an adjacent corner.
+</figcaption>
+</figure>
+
+<p>
+The hypotenuse of this triangle connects the center point to the corner
+point.   Since one leg of the triangle has length 1, the hypotenuse
+must have length greater than 1.
+
+<p>
+To show that the maximum number of points cannot be greater than four,
+divide up the triangle into four smaller equilateral triangles as follows:
+
+<figure>
+<img src="bounding-figs/bounding2.png" alt = "triangle divided into four"   
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 2: Our equilateral triangle divided into four smaller ones.
+  Each smaller triangle cannot contain more than one point.
+</figcaption>
+</figure>
+
+<p>
+
+Suppose we tried to place five or more points into the big triangle.   Since
+there are only four small triangles, by the pigeonhole principle, some small
+triangle would have to contain at least two points.   But since the small
+triangle has side length only 1, these points can't be separated by more than
+one unit.
+
+</blockquote>
+
+
+
+<h2>11.3 Graph coloring</h2>
+
+<p>
+A <b> coloring</b> of a graph $G$ assigns a color to each node
+of $G$, with the restriction that two adjacent nodes never
+have the same color.
+If $G$ can be colored with $k$ colors, we say that $G$ is
+$k$-colorable.
+The <b> chromatic number</b> of $G$, written $\chi(G)$, is the
+smallest number of colors needed to color $G$.
+
+<p>
+For example, only three colors are required for this graph:
+
+<figure>
+<img src="bounding-figs/bounding3.png" alt = "3 color graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 3: This graph can be colored with three colors.
+</figcaption>
+</figure>
+
+
+<p>
+But the complete graph $K_n$ requires $n$ colors, because each
+node is adjacent to all the other nodes.  E.g. $K_4$ can
+be colored as follows:
+
+<figure>
+<img src="bounding-figs/bounding4.png" alt = "complete graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 4: The complete graph on four notes ($K_4$) requires four colors.
+</figcaption>
+</figure>
+
+<p>
+To establish that $n$ is the chromatic number for a graph $G$, we need
+to establish two facts:
+
+<ul>
+<li> $\chi(G) \le n$: $G$ can be colored with $n$ colors.
+<li> $\chi(G) \ge n$: $G$ cannot be colored with less than $n$ colors
+</ul>
+
+<p>
+For small finite graphs, the simplest way to show that $\chi(G) \le n$ 
+is to show a coloring of $G$ that uses $n$ colors.
+For a larger class of graphs, we could describe an algorithm for
+doing the coloring.   For example, we can color a cyclic graph
+with an even number of nodes by alternating colors around the circle.
+A bipartite graph never requires more than two colors.
+
+<p>
+Showing that $\chi(G) \ge n$ can sometimes be equally straightforward.   
+For example,  if the graph has
+any edges at all, its chromatic number must be at least 2.
+If $G$ contains
+a copy of $K_n$, the chromatic number of $G$ must be at least $n$ because
+$K_n$ can't be colored with less than $n$ colors.   
+
+<p>
+However, the following example shows why this process can get tricky.
+The graph in Figure 5, called the <b> Moser spindle</b>
+is relatively easy to color with 4 colors.   But the largest
+complete graph in it is $K_3$, which gives us a lower bound of
+only 3.   Showing that the chromatic number is actually 4
+requires carefully stepping through all 
+possible ways to assign three colors to the nodes and
+explaining why none can end with a complete coloring.
+
+
+<figure>
+<img src="bounding-figs/bounding5.png" alt = "Moser spindle graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 5: This graph, called the Moser spindle,
+  requires four colors even though it does not
+  contain $K_4$.
+</figcaption>
+</figure>
+
+<p>
+  Once we've worked out the chromatic numbers of key small graphs,
+  we can use them find lower bounds on the chromatic number of
+  complex graphs.  For example, any graph
+  containing the Moser spindle must have chromatic number at least 4.
+
+<p>
+Here's a handy table of special graphs:
+
+<table cellpadding=5 frame=box rules=all>
+  <tr>
+<th>Graph </th>
+<th>Chromatic number</th>
+  </tr>
+
+  <tr>
+<td>$K_n$</td>
+<td>n</td>
+  </tr>
+
+  <tr>
+<td>$C_n$</td>
+<td>2 if n is even<br> 3 if n is odd</td>
+  </tr>
+
+  <tr>
+<td>$W_n$</td>
+<td>3 if n is even<br> 4 if n is odd</td>
+  </tr>
+
+  <tr>
+<td>Moser spindle</td>
+<td>4</td>
+  </tr>
+
+</table>  
+
+
+
+<h2>11.4 Why care about graph coloring?</h2>
+
+<p>
+Graph coloring is required for solving a wide range of
+practical problems.  For example, there is a coloring algorithm embedded
+in most compilers.  Because the general problem can't be solved
+efficiently, the implemented algorithms use limitations or
+approximations of various sorts so that they can run in a reasonable  
+amount of time.
+
+<p>
+For example, catalog and 
+on-line retailers frequently organize their clothes
+offerings into collections, e.g. ``Golfing Geezer'' or
+``Tough but Toucheable'' or ``Uniforms 4 U.''
+All items in a collection are guaranteed to be 
+compatible.   This helps retailers market clothes to folks with no
+dress sense, as well as cope with the fact that people 
+are sensitive to fine color distinctions that aren't reproduced
+accurately in catalogs and on computer screens.   
+How many collections are required to organize the 
+retailer's inventory of clothes? 
+
+<p>
+We can model this problem as graph coloring.   
+Each graph node is an item of
+clothing.  Edges join pairs of items that aren't compatible,
+e.g. the bright green pants don't go with the grey-orange shirt,
+the business formal blouse doesn't go with the golfing pants.
+The ``color'' on each node is the name of a collection.
+If we find that too many collections are required, we might want
+to remove selected items of clothing (e.g. the bottle green
+bell bottoms that match nothing) from our inventory.
+
+<p>
+We can model a sudoku puzzle by setting up one node for each square.
+The colors are the 9 numbers, and some are pre-assigned to certain
+nodes.  Two nodes are connected if their squares are in the same
+block or row or column.  The puzzle is solvable if we can 9-color
+this graph, respecting the pre-assigned colors.
+
+<p>
+We can model exam scheduling as a coloring problem.  The exams for two
+courses should not be put at the same time if there is a student who
+is in both courses.  So we can model this as a graph, in which each
+course is a node and courses are connected by edges if they share
+students.  The question is then whether we can color the graph with
+$k$ colors, where $k$ is the number of exam times in our schedule.
+
+<p>
+In the exam scheduling problem, we actually expect the answer to be
+``no,'' because eliminating conflicts would require an excessive
+number of exam times.  So the real practical problem is: how few
+students do we have to take out of the picture (i.e. give special
+conflict exams to) in order to be able to solve the coloring problem
+with a reasonable value for $k$.  We also have the option of splitting
+a course (i.e. offering a scheduled conflict exam) to simplify the
+graph.
+
+<p>
+A particularly important use of coloring in computer science is
+register allocation.  A large java or C program contains many named
+variables.  But a computer has a smallish number (e.g. 32) of fast
+registers which can feed basic operations such as addition.  So
+variables must be allocated to specific registers.  
+
+<p>
+The nodes in this coloring problem are variables.  The colors are
+registers.  Two variables are connected by an edge if they are in use
+at the same time and, therefore, cannot share a register.  As with the
+exam scheduling problem, we actually expect the raw coloring problem
+to fail.   The compiler then uses so-called ``spill'' operations to
+break up the dependencies and create a graph we can color with our
+limited number of registers.
+The goal is to use as few spills as possible.
+
+
+<h2>11.5 Proving set equality</h2>
+
+<p>
+Finally, 2-way bounding proofs are often used to prove that two sets $A$ and
+$B$ are equal.  That is, we show that $A \subseteq B$ and $B \subseteq
+A$, using separate subproofs.  We can then conclude that $A = B$.
+This looks superficially different from the previous examples, because
+the relation is $\subseteq$ rather than $\le$.   But the main idea
+is the same:  we first show that $A$ is no larger than $B$, and
+then show that $A$ is no smaller than $B$.
+
+<p>
+As an example, let's look at
+
+<blockquote>
+  <b>Claim 2: </b>
+Let $A = \{15p+9q \mid p,q \in \mathbb{Z}\}$
+Then $A =\{\text{multiples of 3}\}$.  
+</blockquote>
+
+<p>
+Before you try to prove this, first put some sample integer
+values into the formula $15p+9q$.   See if you can convince
+yourself informally that this formula really generates all
+and only multiples of 3.
+
+<p>
+Using the bounding method, we would write the proof as follows:
+
+<blockquote>
+Proof: 
+
+<p>
+(1) Show that $A \subseteq \{\text{multiples of 3}\}$.
+
+<p>
+Let $x$ be an element of $A$.   By the definition of $A$,
+$x =15s + 9t$, for some integers $s$ and $t$.
+But then $x = 3(5s + 3t)$.   $4s+3t$ is an integer, since
+$s$ and $t$ are integers.   So $x$ is a multiple of 3.
+
+<p>
+(2) Show that $\{\text{multiples of 3}\} \subseteq A$.
+
+<p>
+Notice that (*) $15\cdot(-1) + 9\cdot 2 = 3$.
+
+<p>
+Let $x$ be a multiple of 3.   Then $x = 3n$ for some 
+integer $n$.   Substituting (*) into this equation,
+we get $x = (15\cdot(-1) + 9\cdot 2)n$.   
+So $x = 15\cdot(-n) + 9\cdot (2n)$.   
+So $x$ is an element of $A$.
+
+<p>
+Since we've shown that $A \subseteq \{\text{multiples of 3}\}$ and
+$\{\text{multiples of 3}\} \subseteq A$, we can conclude that
+$A$ = $\{\text{multiples of 3}\}$.
+
+</blockquote>
+
+<h2>11.6 Variation in terminology</h2>
+
+<p>
+When coloring graphs, we have placed colors on vertices.
+A closely-related set of problems involve placing colors
+on edges.   The terms ``vertex coloring'' and ``edge coloring''
+are used when it's necessary to distinguish the two.
+
+
+
+</body>
+</html>
+

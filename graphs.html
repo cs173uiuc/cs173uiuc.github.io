@@ -1,0 +1,691 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <title>Building Blocks</title>
+</head>
+<body style="font-family: Palatino, Bookman, serif;"  
+  topmargin=50   bottommargin=50   rightmargin=50  leftmargin=50>
+
+
+<script>
+MathJax = {
+  output: {
+    font: 'mathjax-asana'
+},
+  tex: {
+    inlineMath: {'[+]': [['$', '$']]}
+  },
+  svg: {
+    blacker: 20,          // the stroke-width to use for SVG character paths
+    fontCache: 'global'
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js"></script>
+
+<table>
+<tr>
+<td><img src="general-figs/blocks.jpg" alt="building blocks"></td>
+<td> <h2 style="font-family:Jazz LET, fantasy;">   Building Blocks<br>
+    for<br>
+    Theoretical Computer Science
+    </h2>
+  <br>
+  <h3>Margaret M. Fleck</h3>
+</td>
+</tr>
+</table>
+
+<hr>
+<h1 style="font-family:Jazz LET, fantasy;">
+Chapter 9: Graphs </h1>
+<hr>
+
+<p>
+Graphs are a very general class of object, used to formalize
+a wide variety of practical problems in computer science.
+In this chapter, we'll see the 
+basics of (finite) undirected graphs, including
+graph isomorphism and connectivity.
+
+<h2>9.1 Graphs</h2>
+
+<p>
+A graph consists of a set of nodes $V$
+and a set of edges $E$.   We'll sometimes refer to the graph
+as a pair of sets $(V,E)$.
+Each edge in $E$ joins two nodes in $V$.
+Two nodes connected by an edge are 
+called <b> neighbors</b> or <b> adjacent</b>.
+
+<p>
+For example, here is a graph in which the nodes
+are Illinois cities and the edges are roads joining them:
+
+<figure>
+  <img src="graphs-figs/city-map-1.png" alt="IL cities graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 1: roads connecting six cities in Illinois.
+</figcaption>
+</figure>
+
+
+<p>
+A graph edge can be traversed in both directions, as in this street
+example, i.e. the edges are <b> undirected</b>.  
+When discussing
+relations earlier, we used <b>directed graphs</b>, in which each edge
+had a specific direction.   
+Unless we explicitly state otherwise,
+a ``graph'' will always be undirected. 
+Concepts for undirected graphs extend in straightforward ways to
+directed graphs.
+
+<p>
+When there is only one edge connecting two nodes $x$ and $y$, we can
+name the edge using the pair of nodes.   We could call the edge
+$xy$ or (since order doesn't matter) $yx$ or $\{x,y\}$.
+So, in the graph above, the Urbana-Danville edge connects
+the node Urbana and the node Danville.
+
+<p>
+In some applications, we need graphs in which two nodes are 
+connected by multiple edges, i.e. parallel edges with
+the same endpoints.   For example, the following graph
+shows ways to travel among four cities in the San Francisco
+Bay Area.   It has three edges from San Francisco to Oakland,
+representing different modes of transportation.   When multiple
+edges are present, we typically label the edges rather than 
+trying to name edges by their endpoints.
+This diagram also illustrates a <b> loop</b> edge which connects
+a node to itself.   
+
+<figure>
+  <img src="graphs-figs/city-map-2.png" alt="CA cities graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 2: four cities in California, with multiple edges showing
+  different ways to get between pairs of cities.
+</figcaption>
+</figure>
+
+
+<p>
+A graph is called a <b> simple graph</b> if it has
+neither multiple edges nor loop edges.   
+Unless we explicitly state otherwise, a ``graph'' will
+always be a simple graph.   Also, we'll assume that
+it has at least one node and that
+it has only a finite number of edges and nodes.
+Again, most concepts extend in a reasonable way to 
+infinite and non-simple graphs.
+
+
+<h2>9.2 Degrees</h2>
+
+<p>
+The degree of a node $v$, written $deg(v)$ is the
+number of edges which have $v$ as an endpoint.
+Self-loops,
+if you are allowing them, count twice.
+For example, in the following graph, $a$ has degree 2, $b$ has degree 6, 
+$d$ has degree 0, and so forth.
+
+
+<figure>
+  <img src="graphs-figs/degrees.png" alt="graph degrees"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 3: this graph has six nodes with varying numbers of edges
+  touching each node (aka different node degrees).
+</figcaption>
+</figure>
+
+
+<p>
+Each edge contributes to two node degrees.
+So the sum of the degrees of all the nodes is twice the number
+of edges.   This is called the
+Handshaking Theorem and can be written as
+
+$$\sum_{v \in V} deg(v) = 2|E|$$
+
+<p>
+This is a slightly different version of summation notation.   
+We pick each node $v$ in the set $V$, get its degree,
+and add its value into the sum.   Since $V$ is finite,
+we could also have given names to the nodes
+$v_1,\ldots, v_n$ and then written
+
+$$\sum_{k=1}^n{v_k \in V} deg(v) = 2|E|$$
+
+<p>
+The advantage to the first, set-based, style is that it 
+generalizes well to situations involving infinite sets.
+
+<h2>9.3 Complete graphs</h2>
+
+<p>
+Several special types of graphs are useful as examples.
+First, the complete graph on $n$ nodes (shorthand name $K_n$),
+is a graph with $n$ nodes in which every node is connected
+to every other node.  $K_5$ is shown below.   
+
+<figure>
+  <img src="graphs-figs/K5.png" alt="K5 graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 4: $K_5$ i.e. the complete graph on 5 nodes.
+</figcaption>
+</figure>
+
+
+<p>
+To calculate the number of edges in $K_n$, think about the situation from
+the perspective of the first node.   It is connected to $n-1$ other nodes.
+If we look at the second node, it adds $n-2$ more connections.   
+And so forth.
+So we have $\sum_{k=1}^n (n-k) = \sum_{k=0}^{n-1} k = 
+\frac{n(n-1)}{2}$ edges.   
+
+<h2>9.4 Cycle graphs and wheels</h2>
+
+<p>
+Suppose that we have $n$ nodes named $v_1,\ldots,v_n$, where
+$n \ge 3$. Then the
+cycle graph $C_n$ is the graph with these nodes and edges
+connecting $v_i$ to $v_{i+1}$, plus an additional edge from $v_n$ to
+$v_1$.   That is, the set of edges is:
+
+$$E= \{v_1v_2,\ v_2v_3,\ \ldots,\ v_{n-1}v_n,\ v_nv_1\}$$
+
+<p>
+So $C_5$ looks like
+
+<figure>
+  <img src="graphs-figs/C5.png" alt="C5 graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 5: $C_5$ i.e. the cycle graph on 5 nodes.
+</figcaption>
+</figure>
+
+
+<p>
+$C_n$ has $n$ nodes and also $n$ edges.  Cycle graphs often occur in networking
+applications.   They could also be used to model games like ``telephone'' where
+people sit in a circle and communicate only with their neighbors.
+
+<p>
+The wheel $W_n$ is just like the cycle graph 
+$C_n$ except that it has an additional
+central ``hub'' node which is connected to all the others.
+Notice that $W_n$ has $n+1$ nodes (not $n$ nodes).   It has $2n$ edges.
+For example, $W_5$ looks like
+
+<figure>
+  <img src="graphs-figs/W5.png" alt="W5 graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 6: $W_5$ i.e. the cycle graph on 5 nodes.
+</figcaption>
+</figure>
+
+
+<h2>9.5 Isomorphism</h2>
+
+<p>
+In graph theory, we only care about how nodes and edges
+are connected together.   We don't care about how they
+are arranged on the page or in space, how the nodes and
+edges are named, and whether the
+edges are drawn as straight or curvy.
+We would like to treat graphs as interchangeable if they
+have the same abstract connectivity structure.
+
+<p>
+Specifically, 
+suppose that $G_1 = (V_1,E_1)$ and $G_2 = (V_2,E_2)$ are
+graphs.   An <b> isomorphism</b> from $G_1$ to $G_2$ 
+is a bijection $f:V_1 \rightarrow V_2$ such that
+nodes $a$ and $b$ are joined by an edge if and only if
+$f(a)$ and $f(b)$ are joined by an edge.
+The graphs $G_1$ and $G_2$ are <b> isomorphic</b> if there is
+an isomorphism from $G_1$ to $G_2$.
+
+<p>
+For example, the following two graphs
+are isomorphic.   We can prove this by defining
+the function $f$ so that it maps $1$ to $d$, $2$ to $a$,
+$3$ to $c$, and $4$ to $b$.   The reader can then verify that
+edges exist in the left graph if and only if the corresponding
+edges exist in the right graph.
+
+<figure>
+  <img src="graphs-figs/isomorphic.png" alt="isomorphic"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 7: Two isomorphic graphs
+</figcaption>
+</figure>
+
+
+<p>
+Graph isomorphism is another example of an equivalence relation.
+Each equivalence class contains a group of graphs which 
+are
+superficially different (e.g. different names for the nodes,
+drawn differently on the page)
+but all represent the same underlying abstract graph.
+
+<p>
+To prove that two graphs are not isomorphic, we could walk through all
+possible functions mapping the nodes of one to the nodes of the
+other.   However, that's a huge number of functions for graphs of
+any interesting size.   An exponential number, in fact.
+Instead, a better technique for many examples is to
+notice that a number of graph properties
+are ``invariant,''  i.e. preserved by isomorphism.
+
+<ul>
+<li> The two graphs must have the same number of nodes and
+the same number of edges.
+<li> For any node degree $k$, the two graphs must have the
+same number of nodes of degree $k$.  For example, they
+must have the same number of nodes with degree 3.
+</ul>
+
+<p>
+We can prove that two graphs are not isomorphic by giving one
+example of a property that is supposed to be invariant but, in fact,
+differs between the two graphs.   For example, in the following
+picture, the lefthand graph has a node of degree 3, but the
+righthand graph has no nodes of degree 3, so they can't be isomorphic.
+
+<figure>
+  <img src="graphs-figs/not-isomorphic-1.png" alt="not isomorphic 1"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 8: graphs that aren't isomorphic.
+</figcaption>
+</figure>
+
+
+
+<h2>9.6 Subgraphs</h2>
+
+<p>
+It's not hard to find a pair of graphs that aren't isomorphic but
+where the most obvious properties (e.g. node degrees) match.  To
+prove that such a pair isn't isomorphic, it's often helpful to focus
+on certain specific local features of one graph that aren't present in
+the other graph.  For example, the following two graphs have the same
+node degrees: one node of degree 1, three of degree 2, one of
+degree 3.  However, a little experimentation suggests they aren't
+isomorphic.
+
+<figure>
+  <img src="graphs-figs/not-isomorphic-2.png" alt="not isomorphic 2"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 9: graphs that have the same number of nodes with each degree but
+  still aren't isomorphic.
+</figcaption>
+</figure>
+
+
+<p>
+To make a convincing argument that these graphs aren't isomorphic,
+we need to define the notion of a <b> subgraph</b>.
+If $G$ and $G'$ are graphs, 
+then $G'$ is a subgraph of $G$ if and only if
+the nodes of $G'$ are
+a subset of the nodes of $G$ and the edges of $G'$ are a subset
+of the edges of $G$.
+If two graphs $G$ and $F$ are isomorphic, then any subgraph of $G$ must
+have a matching subgraph somewhere in $F$.
+
+<p>
+A graph has a huge number of subgraphs. However, we can usually
+find evidence of non-isomorphism by looking at small subgraphs.
+For example, in the graphs above,
+the lefthand graph has $C_3$ as a subgraph, but the righthand
+graph does not.  So they can't be isomorphic.
+
+
+<h2>9.7 Walks, paths, and cycles</h2>
+
+<p>
+In a graph $G$,
+a walk of length $k$ from node $a$ to node $b$ is
+a finite sequence of nodes 
+$a=v_1,v_2, \ldots, v_n=b$
+and a finite sequence of edges
+$e_1,e_2, \ldots, e_{n-1}$
+in which $e_i$ connects $v_i$ and $v_{i+1}$, for 
+all $i$.
+Under most circumstances, it isn't necessary to give both
+the sequence of nodes and the sequence of edges:  one
+of the two is usually sufficient.
+The length of a walk is the number of edges in it.
+The shortest walks consist of just a single node and
+have length zero.  
+
+<p>
+A walk is <b> closed</b> if its starting and ending nodes are
+the same.   Otherwise it is <b> open</b>.
+A <b> path</b> 
+is a walk in which no node is used more than once.
+A <b> cycle</b> is a closed walk with at least three
+nodes in which no node is used
+more than once except that the starting and ending nodes are
+the same.
+The apparently ad-hoc requirement that a cycle contain at least
+three nodes is important, because it forces a cycle to form
+a ring that can (for example) enclose a region of 2D.
+
+<p>
+For example, in the following graph, there is a length-3 walk from $a$
+to $e$:  $ac$, $cd$, $de$.
+Another walk of length 3 would have edges: $ab$, $bd$, $de$.
+These two walks are also paths.
+There are also longer walks from $a$ to $e$, which aren't paths because
+they re-use nodes, e.g. the walk with a node sequence
+$a,c, d, b, d, e$.
+If you have a walk between two nodes, you can always create a path
+between the nodes by pruning unnecessary loops from the walk.
+
+<figure>
+  <img src="graphs-figs/walks.png" alt="walks"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 10: a 4-cycle (a,b,d,c) with node e attached to node d.
+</figcaption>
+</figure>
+
+
+<p>
+In the following graph, one cycle of length 4 has edges:
+$ab,bd,dc,ca$.
+Other closely-related cycles
+go through the same nodes but
+with a different starting point or in the opposite direction, e.g.
+$dc,bd, ab, ca$.
+(Remember that $cd$ and $dc$ are two names for the same edge.)
+Unlike cycles, closed walks can re-use nodes, e.g.
+$ab, ba, ac, ce, ec, ca$ is a closed walk but not a cycle.
+
+<figure>
+  <img src="graphs-figs/cycles.png" alt="graph with cycles"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 11: Two $C_4$ graphs (a, c, b, d) and (c, e, f, d) that share 
+  the edge cd.
+</figcaption>
+</figure>
+
+
+<p>
+The following graph is <b> acyclic</b>, i.e. it 
+doesn't contain any cycles.
+
+<figure>
+  <img src="graphs-figs/acyclic.png" alt="acyclic graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 12: 6-node graph with no cycles.
+</figcaption>
+</figure>
+
+
+<p>
+  Notice that the cycle graph $C_n$ contains one cycle if you specify
+  that the direction and starting position don't matter.
+  If you do care about direction and starting position, it 
+  contains $2n$ different cycles.
+For example, if the vertices of $C_4$ are labelled as shown below,
+then one cycle is $ab, bc, cd, da$, another is 
+$cd, bc, ab, da$, and so forth.  
+  The moral of this story is that you should be specific about 
+  what counts as "the same" cycle when making claims about how many
+  a graph contains.
+
+<figure>
+  <img src="graphs-figs/C4.png" alt="C5 graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 13: $C_4$ i.e. the cycle graph on 4 nodes.
+</figcaption>
+</figure>
+
+
+<h2>9.8 Connectivity</h2>
+
+<p>
+A graph $G$ is <b> connected</b> if there is a walk between every pair of
+nodes in $G$.  Our previous examples of graphs were connected.
+The following graph is not connected,
+because there is no walk from (for example), $a$ to $g$.
+
+<figure>
+  <img src="graphs-figs/three-components.png" alt="3-component graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 14: A graph with three connected components:  a 4-cycle, a
+  3 cycle, and an isolated node.
+</figcaption>
+</figure>
+
+<p>
+If we have a graph $G$ that might or might not be
+connected, we can divide $G$ into <b> connected
+components</b>.   Each connected component contains a maximal
+(i.e. biggest possible)
+set of nodes that are all connected to one another, plus
+all their edges.
+So, the above graph has three connected
+components: one containing nodes a,b,c, and d, a
+second containing nodes e, f, and g, and a third that
+contains only the node h.
+
+<p>
+Sometimes two parts of a graph are connected by only a single
+edge, so that the graph would become disconnected if that edge
+were removed.   This is called a <b> cut edge</b>.  For example,
+in the following graph, the edge $ce$ is a cut edge.
+In some applications, cut edges are a problem.   E.g. in 
+networking, they are places where the network is vulnerable.
+In other applications (e.g. compilers), they represent
+opportunities to divide a larger problem into several simpler ones.
+
+
+<figure>
+  <img src="graphs-figs/cut-edge.png" alt="cut edge"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 15: A graph with two pieces joined only by a single "cut edge".
+</figcaption>
+</figure>
+
+
+<h2>9.9 Distances</h2>
+
+<p>
+In graphs, distances are based on the lengths of paths connecting
+pairs of nodes.   Specifically, the distance $d(a,b)$ between
+two nodes $a$ and $b$ is the length of the shortest path from
+$a$ to $b$.  The diameter of a graph is the maximum distance
+between any pair of nodes in the graph.   For example,
+the lefthand graph below has diameter 4, because $d(f,e) = 4$
+and no other pair of nodes is further apart.
+The righthand graph has diameter 2, because $d(1,5) = 2$ and
+no other pair of nodes is further apart.
+
+<figure>
+  <img src="graphs-figs/diameter.png" alt="diameters"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 16: The left graph has diameter 4; the right graph has
+  diameter 2.
+</figcaption>
+</figure>
+
+
+<h2>9.10 Euler circuits</h2>
+
+<p>
+An Euler circuit of a graph $G$ is a closed walk that
+uses each edge of the graph exactly once.
+Notice that ``$G$ has an Euler circuit'' means
+that every edge of $G$ is in the circuit;  it's not
+enough for some subgraph of $G$ to have a suitable circuit.
+For example, one
+Euler circuit of the following graph would be
+$ac$, $cd$, $df$, $fe$, $ec$, $cf$, $fb$, $ba$.
+
+<figure>
+  <img src="graphs-figs/euler-circuit.png" alt="Euler circuit"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 17: a complex 6-node graph that has an Euler circuit.
+</figcaption>
+</figure>
+
+
+<p>
+An Euler circuit is possible exactly when the graph is connected
+and each node
+has even degree.   Each node has to have even degree
+because, in order to complete the circuit, you have to
+leave each node that you enter.   
+If the node has odd degree, you
+will eventually enter a node but have no unused edge to go out on.
+
+<p>
+Fascination with Euler circuits dates back to the 18th century.
+At that time, the city of K&ouml;nigsberg, in Prussia, had a set
+of bridges that looked roughly as follows:in
+
+<figure>
+  <img src="graphs-figs/konigsberg.png" alt="K&ouml;nigsberg bridges"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 18: The seven bridges connecting the banks of a river and
+  two islands in K&ouml;nigsberg.
+</figcaption>
+</figure>
+
+
+<p>
+Folks in the town wondered whether it was possible to take a walk
+in which you crossed each bridge exactly once, coming back to the
+same place you started.   This is the kind of thing that starts
+long debates late at night in pubs, or keeps people amused during
+boring church services.   Leonard Euler was the one who explained
+clearly why this isn't possible.
+
+<p>
+  If we model the K&ouml;nigsberg as a graph, with each area of land
+  being a node, it looks as follows.
+Since all of the nodes have odd degree, there's no possibility
+of an Euler circuit.
+
+
+<figure>
+  <img src="graphs-figs/konigsberg-graph.png" alt="K&ouml;nigsberg graph"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 19: Graph modelling the K&ouml;nigsberg bridges.
+</figcaption>
+</figure>
+
+
+
+<h2>9.11 Bipartite graphs</h2>
+
+<p>
+Another special type of graph is a bipartite graph.  A graph
+$G=(V,E)$ is <b> bipartite</b> if we can split $V$ into two non-overlapping
+subsets $V_1$ and $V_2$ such that every edge in $G$ connects an
+element of $V_1$ with an element of $V_2$.  That is, no edge connects
+two nodes from the same part of the division.  
+For example, the cube graph is bipartite.   If we assign
+nodes to the R and G groups as shown below, then
+there are no edges connecting an R node to an R node,
+or a G node to a G node.
+
+<figure>
+  <img src="graphs-figs/cube.png" alt="cube"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 20: The edges of a cube form a bipartite graph.
+</figcaption>
+</figure>
+
+<p>
+Bipartite graphs often appear in matching problems, where the two
+subsets represent different types of objects.  For example,
+one group of nodes might be students, the other group of nodes
+might be workstudy jobs, and the edges might indicate which
+jobs each student is interested in.
+
+<p>
+The complete bipartite graph $K_{m,n}$ is a bipartite graph with $m$ nodes
+in $V_1$, $n$ nodes in $V_2$, and which contains all possible edges that are
+consistent with the definition of bipartite.   The diagram below shows
+a bipartite graph on a set of 7 nodes and also the complete bipartite
+graph $K_{3,2}$.   
+The complete bipartite graph $K_{m,n}$ has $m+n$ nodes and
+$mn$ edges.
+
+<figure>
+  <img src="graphs-figs/bipartite.png" alt="bipartite"
+     style="margin:20px 0px" >
+<figcaption>
+  Fig. 21: Left is a bipartite graph with 7 nodes.
+  Right is $K_{3,2}$, the complete bipartite graph connecting
+  three nodes to two nodes.
+</figcaption>
+</figure>
+
+<p>
+  Notice (e.g. left graph in Figure 21) that a bipartite graph does not
+  need to have an edge connecting every node in the first half to every
+  node in the second half.
+
+
+<h2>9.12 Variation in terminology</h2>
+
+<p>
+Although the core ideas of graph theory are quite stable,
+terminology varies a lot and there is a huge range of
+specialized terminology for specific types of graphs.   
+In particular, nodes are often called ``vertices''
+Notice that the singular of this term is ``vertex'' (not
+``vertice'').  A complete graph on some set of vertices 
+is also known as a clique.
+
+<p>
+What we're calling a ``walk'' used to be widely called a 
+``path.''  Authors who still use this convention
+would then use the term
+``simple path'' to exclude repetition of vertices.   
+Terms for closely-related concepts, e.g. cycle, often change
+as well.
+
+<p>
+Authors vary as to whether the wheel graph $W_n$ has $n$ or
+$n+1$ nodes.
+
+
+</body>
+</html>
+
+
+
+
+
+
