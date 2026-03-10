@@ -101,8 +101,13 @@ body {
 #sidebar-nav a.active { background: var(--accent); color: #fff; font-weight: 500; }
 
 /* ── Main content ────────────────────────────────── */
-#content {
+#main-content {
   margin-left: var(--sidebar-width);
+  flex: 1;
+  min-width: 0;
+}
+
+#main-content #content {
   max-width: 780px;
   padding: 3rem 3rem 6rem;
   width: 100%;
@@ -226,8 +231,10 @@ pre { padding: 1rem; overflow-x: auto; border: 1px solid var(--border); margin-b
     transition: transform 0.25s ease;
   }
   #sidebar.open { transform: translateX(0); }
-  #content {
+  #main-content {
     margin-left: 0;
+  }
+  #main-content #content {
     padding: 4.5rem 1.25rem 3rem;
     max-width: 100%;
   }
