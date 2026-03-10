@@ -45,13 +45,14 @@
   }
 
   async function typesetMath(element) {
-    if (!window.MathJax) return;
+    if (!window.MathJax?.startup?.promise) return;
     await MathJax.startup.promise;
     await MathJax.typesetPromise([element]);
   }
 
   async function loadPage(href, pushState = true) {
     const mainContent = document.getElementById('main-content');
+    if (!mainContent) return;
 
     if (href === 'index.html') {
       mainContent.innerHTML = homeHTML;
@@ -73,12 +74,11 @@
       mainContent.appendChild(content);
       window.scrollTo(0, 0);
       await typesetMath(mainContent);
+      if (pushState) history.pushState({ page: href }, '', '?page=' + href);
+      setActiveLink(href);
     } catch (err) {
-      mainContent.innerHTML = '<div id="content"><p style="color:var(--accent)">Failed to load page: ' + href + '</p></div>';
+      mainContent.innerHTML = '<div id="content"><p style="color:var(--accent)">Failed to load page.</p></div>';
     }
-
-    if (pushState) history.pushState({ page: href }, '', '?page=' + href);
-    setActiveLink(href);
 
     // Close mobile sidebar if open
     const sidebar = document.getElementById('sidebar');
@@ -157,7 +157,7 @@
   }
 
   window.addEventListener('popstate', e => {
-    const page = (e.state && e.state.page) || 'index.html';
+    const page = (e.state && e.state.page) || getCurrentPage();
     loadPage(page, false);
   });
 
