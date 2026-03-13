@@ -32,6 +32,11 @@
 
   // Saved home page HTML — captured after DOMContentLoaded, restored on home navigation
   let homeHTML = '';
+  const pageCache = new Map();
+  let prefetchPromise = null;
+  let warmRenderPromise = null;
+  const searchIndex = new Map();
+  let searchBuildPromise = null;
 
   function getCurrentPage() {
     const params = new URLSearchParams(window.location.search);
@@ -50,6 +55,307 @@
     await MathJax.typesetPromise([element]);
   }
 
+  function normalizeText(text) {
+    return text.replace(/\s+/g, ' ').trim();
+  }
+
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function buildSearchRegex(query, options) {
+    const source = escapeRegExp(query);
+    const pattern = options.wholeWord ? '\\b' + source + '\\b' : source;
+    return new RegExp(pattern, options.caseSensitive ? 'g' : 'gi');
+  }
+
+  function createSnippet(text, startIndex, termLength) {
+    const context = 70;
+    const start = Math.max(0, startIndex - context);
+    const end = Math.min(text.length, startIndex + termLength + context);
+    const prefix = start > 0 ? '... ' : '';
+    const suffix = end < text.length ? ' ...' : '';
+    return prefix + text.slice(start, end).trim() + suffix;
+  }
+
+  function wrapContentHTML(innerHTML) {
+    return '<div id="content">' + innerHTML + '</div>';
+  }
+
+  function extractContentDataFromText(text) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const content = doc.getElementById('content');
+    if (!content) throw new Error('no #content found');
+    return {
+      rawHTML: content.innerHTML,
+      searchText: normalizeText(content.textContent || ''),
+    };
+  }
+
+  function storePageCache(href, data) {
+    const existing = pageCache.get(href) || {};
+    const merged = {
+      rawHTML: data.rawHTML ?? existing.rawHTML ?? '',
+      searchText: data.searchText ?? existing.searchText ?? '',
+      renderedHTML: data.renderedHTML ?? existing.renderedHTML,
+    };
+    pageCache.set(href, merged);
+    searchIndex.set(href, { text: merged.searchText });
+    return merged;
+  }
+
+  async function getPageData(href) {
+    const cached = pageCache.get(href);
+    if (cached && cached.rawHTML) return cached;
+
+    const res = await fetch(href);
+    if (!res.ok) throw new Error(String(res.status));
+    const text = await res.text();
+    const data = extractContentDataFromText(text);
+    return storePageCache(href, data);
+  }
+
+  async function prefetchAllPages() {
+    if (prefetchPromise) {
+      await prefetchPromise;
+      return;
+    }
+
+    prefetchPromise = Promise.allSettled(
+      chapters.map(ch => getPageData(ch.href).catch(() => null))
+    ).then(() => {});
+    await prefetchPromise;
+  }
+
+  async function warmRenderedPages() {
+    if (warmRenderPromise) {
+      await warmRenderPromise;
+      return;
+    }
+
+    warmRenderPromise = (async () => {
+      await prefetchAllPages();
+      const worker = document.createElement('div');
+      worker.style.position = 'absolute';
+      worker.style.left = '-100000px';
+      worker.style.top = '0';
+      worker.style.width = '780px';
+      worker.style.visibility = 'hidden';
+      worker.style.pointerEvents = 'none';
+      document.body.appendChild(worker);
+
+      try {
+        for (const ch of chapters) {
+          const entry = pageCache.get(ch.href);
+          if (!entry || !entry.rawHTML || entry.renderedHTML) continue;
+          worker.innerHTML = wrapContentHTML(entry.rawHTML);
+          await typesetMath(worker);
+          const content = worker.querySelector('#content');
+          if (content) {
+            entry.renderedHTML = content.outerHTML;
+          }
+        }
+      } finally {
+        worker.remove();
+      }
+    })();
+
+    await warmRenderPromise;
+  }
+
+  async function getPageSearchText(href) {
+    try {
+      const entry = await getPageData(href);
+      return { text: entry.searchText || '' };
+    } catch {
+      const value = { text: '' };
+      searchIndex.set(href, value);
+      return value;
+    }
+  }
+
+  async function buildSearchIndex() {
+    if (searchBuildPromise) {
+      await searchBuildPromise;
+      return;
+    }
+
+    searchBuildPromise = Promise.all(chapters.map(ch => getPageSearchText(ch.href))).then(() => {});
+    await searchBuildPromise;
+  }
+
+  function searchLessons(query, options) {
+    const results = [];
+    const regex = buildSearchRegex(query, options);
+
+    chapters.forEach(ch => {
+      const entry = searchIndex.get(ch.href);
+      if (!entry || !entry.text) return;
+
+      regex.lastIndex = 0;
+      let count = 0;
+      let firstMatchIndex = -1;
+      let match;
+
+      while ((match = regex.exec(entry.text)) !== null) {
+        count += 1;
+        if (firstMatchIndex < 0) firstMatchIndex = match.index;
+        if (match.index === regex.lastIndex) regex.lastIndex += 1;
+      }
+
+      if (count > 0) {
+        results.push({
+          href: ch.href,
+          title: ch.title,
+          count,
+          snippet: createSnippet(entry.text, firstMatchIndex, query.length),
+        });
+      }
+    });
+
+    return results;
+  }
+
+  function buildSearchPanel() {
+    const panel = document.createElement('div');
+    panel.id = 'sidebar-search';
+
+    const form = document.createElement('form');
+    form.id = 'sidebar-search-form';
+
+    const input = document.createElement('input');
+    input.id = 'sidebar-search-input';
+    input.type = 'search';
+    input.placeholder = 'Search lessons';
+    input.autocomplete = 'off';
+
+    const options = document.createElement('div');
+    options.id = 'search-options';
+
+    const wholeWordLabel = document.createElement('label');
+    const wholeWord = document.createElement('input');
+    wholeWord.type = 'checkbox';
+    wholeWord.id = 'search-whole-word';
+    wholeWordLabel.appendChild(wholeWord);
+    wholeWordLabel.appendChild(document.createTextNode(' Whole word'));
+
+    const caseSensitiveLabel = document.createElement('label');
+    const caseSensitive = document.createElement('input');
+    caseSensitive.type = 'checkbox';
+    caseSensitive.id = 'search-case-sensitive';
+    caseSensitiveLabel.appendChild(caseSensitive);
+    caseSensitiveLabel.appendChild(document.createTextNode(' Case sensitive'));
+
+    options.appendChild(wholeWordLabel);
+    options.appendChild(caseSensitiveLabel);
+
+    const actions = document.createElement('div');
+    actions.id = 'search-actions';
+
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.textContent = 'Find';
+
+    const clear = document.createElement('button');
+    clear.type = 'button';
+    clear.textContent = 'Clear';
+
+    actions.appendChild(submit);
+    actions.appendChild(clear);
+
+    const status = document.createElement('div');
+    status.id = 'search-status';
+    status.setAttribute('aria-live', 'polite');
+
+    const results = document.createElement('div');
+    results.id = 'search-results';
+
+    function clearResults() {
+      status.textContent = '';
+      results.innerHTML = '';
+    }
+
+    function renderResults(items) {
+      results.innerHTML = '';
+
+      if (!items.length) {
+        status.textContent = 'No matches found.';
+        return;
+      }
+
+      status.textContent = 'Found matches in ' + items.length + ' lesson(s).';
+
+      items.forEach(item => {
+        const card = document.createElement('a');
+        card.className = 'search-result';
+        card.href = '?page=' + item.href;
+
+        const title = document.createElement('div');
+        title.className = 'search-result-title';
+        title.textContent = item.title;
+
+        const meta = document.createElement('div');
+        meta.className = 'search-result-meta';
+        meta.textContent = item.count + (item.count === 1 ? ' match' : ' matches');
+
+        const snippet = document.createElement('div');
+        snippet.className = 'search-result-snippet';
+        snippet.textContent = item.snippet;
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(snippet);
+
+        card.addEventListener('click', e => {
+          e.preventDefault();
+          loadPage(item.href);
+        });
+
+        results.appendChild(card);
+      });
+    }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const query = input.value.trim();
+      if (!query) {
+        clearResults();
+        return;
+      }
+
+      status.textContent = 'Searching lessons...';
+      submit.disabled = true;
+
+      try {
+        await buildSearchIndex();
+        const items = searchLessons(query, {
+          wholeWord: wholeWord.checked,
+          caseSensitive: caseSensitive.checked,
+        });
+        renderResults(items);
+      } catch {
+        status.textContent = 'Search failed. Please try again.';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    clear.addEventListener('click', () => {
+      input.value = '';
+      clearResults();
+      input.focus();
+    });
+
+    form.appendChild(input);
+    form.appendChild(options);
+    form.appendChild(actions);
+    panel.appendChild(form);
+    panel.appendChild(status);
+    panel.appendChild(results);
+    return panel;
+  }
+
   async function loadPage(href, pushState = true) {
     const mainContent = document.getElementById('main-content');
     if (!mainContent) return;
@@ -63,17 +369,16 @@
     }
 
     try {
-      const res = await fetch(href);
-      if (!res.ok) throw new Error(res.status);
-      const text = await res.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const content = doc.getElementById('content');
-      if (!content) throw new Error('no #content found in ' + href);
-      mainContent.innerHTML = '';
-      mainContent.appendChild(content);
+      const entry = await getPageData(href);
+      mainContent.innerHTML = entry.renderedHTML || wrapContentHTML(entry.rawHTML);
       window.scrollTo(0, 0);
-      await typesetMath(mainContent);
+      if (!entry.renderedHTML) {
+        await typesetMath(mainContent);
+        const rendered = mainContent.querySelector('#content');
+        if (rendered) {
+          entry.renderedHTML = rendered.outerHTML;
+        }
+      }
       if (pushState) history.pushState({ page: href }, '', '?page=' + href);
       setActiveLink(href);
     } catch (err) {
@@ -124,6 +429,9 @@
       a.href = '?page=' + ch.href;
       a.dataset.href = ch.href;
       a.textContent = ch.title;
+      a.addEventListener('pointerenter', () => {
+        getPageData(ch.href).catch(() => {});
+      }, { once: true });
       a.addEventListener('click', e => {
         e.preventDefault();
         loadPage(ch.href);
@@ -132,6 +440,7 @@
     });
 
     sidebar.appendChild(header);
+    sidebar.appendChild(buildSearchPanel());
     sidebar.appendChild(navDiv);
     return sidebar;
   }
@@ -174,6 +483,17 @@
       loadPage(initialPage, false);
     } else {
       setActiveLink('index.html');
+    }
+
+    prefetchAllPages().catch(() => {});
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        warmRenderedPages().catch(() => {});
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        warmRenderedPages().catch(() => {});
+      }, 700);
     }
   });
 })();
