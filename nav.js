@@ -37,6 +37,7 @@
   let warmRenderPromise = null;
   const searchIndex = new Map();
   let searchBuildPromise = null;
+  let currentSearchQuery = '';
   let activeSearch = null;
   let currentHits = [];
   let activeHitIndex = -1;
@@ -472,7 +473,7 @@
         card.addEventListener('click', e => {
           e.preventDefault();
           activeSearch = {
-            query,
+            query: currentSearchQuery,
             wholeWord: wholeWord.checked,
             caseSensitive: caseSensitive.checked,
           };
@@ -487,9 +488,12 @@
       e.preventDefault();
       const query = input.value.trim();
       if (!query) {
+        currentSearchQuery = '';
         clearResults();
         return;
       }
+
+      currentSearchQuery = query;
 
       status.textContent = 'Searching lessons...';
       submit.disabled = true;
@@ -516,6 +520,7 @@
 
     clear.addEventListener('click', () => {
       input.value = '';
+      currentSearchQuery = '';
       activeSearch = null;
       clearResults();
       applySearchToCurrentPage();
@@ -559,7 +564,10 @@
       if (pushState) history.pushState({ page: href }, '', '?page=' + href);
       setActiveLink(href);
     } catch (err) {
-      mainContent.innerHTML = '<div id="content"><p style="color:var(--accent)">Failed to load page.</p></div>';
+      const localHelp = window.location.protocol === 'file:'
+        ? '<p>Local file mode blocks chapter fetches. Run a local server and open http://localhost:8000 instead.</p><p>Example: <code>python -m http.server 8000</code></p>'
+        : '';
+      mainContent.innerHTML = '<div id="content"><p style="color:var(--accent)">Failed to load page.</p>' + localHelp + '</div>';
       updateHitStatus();
     }
 
