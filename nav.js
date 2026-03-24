@@ -44,6 +44,7 @@
   let searchControls = null;
   const highlightStorageKey = 'cs173-highlights';
   let highlightMenu = null;
+  let highlightIdCounter = 0;
 
   function getCurrentPage() {
     const params = new URLSearchParams(window.location.search);
@@ -87,6 +88,14 @@
 
   function saveStoredHighlights(entries) {
     localStorage.setItem(highlightStorageKey, JSON.stringify(entries));
+  }
+
+  function generateHighlightId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return 'hl-' + crypto.randomUUID();
+    }
+    highlightIdCounter += 1;
+    return 'hl-' + Date.now().toString(36) + '-' + highlightIdCounter.toString(36) + '-' + Math.random().toString(36).slice(2, 8);
   }
 
   function getCurrentContentRoot() {
@@ -179,7 +188,10 @@
     const entries = getStoredHighlights().filter(entry => entry.page === page);
     entries.forEach(entry => {
       if (!entry || typeof entry.start !== 'number' || typeof entry.length !== 'number') return;
-      if (content.querySelector('mark.user-highlight[data-highlight-id="' + entry.id + '"]')) return;
+      const entryId = String(entry.id || '');
+      const alreadyApplied = Array.from(content.querySelectorAll('mark.user-highlight'))
+        .some(mark => (mark.dataset.highlightId || '') === entryId);
+      if (alreadyApplied) return;
       const range = createRangeFromOffsets(content, entry.start, entry.length);
       if (!range || range.collapsed) return;
       if (rangeStartsInsideHighlight(range)) return;
@@ -206,7 +218,7 @@
       return;
     }
 
-    const id = 'hl-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    const id = generateHighlightId();
     if (!wrapRangeWithHighlight(selected.range, id, (comment || '').trim())) {
       hideHighlightMenu();
       return;
@@ -876,7 +888,7 @@
   });
 
   document.addEventListener('selectionchange', () => {
-    if (!highlightMenu || !highlightMenu.hidden) return;
+    if (!highlightMenu) return;
     maybeShowHighlightMenu();
   });
 
