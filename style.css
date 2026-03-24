@@ -255,6 +255,46 @@ mark.search-hit.active {
   background: #ffac3a;
 }
 
+mark.user-highlight {
+  background: #b8f1ff;
+  color: #111;
+  border-radius: 2px;
+  padding: 0 0.08em;
+}
+
+:root.light mark.user-highlight {
+  background: #90e7ff;
+  color: #111;
+}
+
+#selection-menu {
+  position: absolute;
+  z-index: 300;
+  display: inline-flex;
+  gap: 0.4rem;
+  padding: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+#selection-menu button {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.3rem 0.45rem;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.73rem;
+  cursor: pointer;
+}
+
+#selection-menu button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 #sidebar-nav { padding: 0.75rem 0; flex: 1; }
 
 #sidebar-nav a {
