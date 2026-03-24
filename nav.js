@@ -42,6 +42,8 @@
   let currentHits = [];
   let activeHitIndex = -1;
   let searchControls = null;
+  const highlightStorageKey = 'cs173-highlights';
+  let highlightMenu = null;
 
   function getCurrentPage() {
     const params = new URLSearchParams(window.location.search);
@@ -72,6 +74,204 @@
 
   function escapeRegExp(text) {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function getStoredHighlights() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(highlightStorageKey) || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveStoredHighlights(entries) {
+    localStorage.setItem(highlightStorageKey, JSON.stringify(entries));
+  }
+
+  function getCurrentContentRoot() {
+    return document.querySelector('#main-content #content');
+  }
+
+  function getSelectionInContent() {
+    const content = getCurrentContentRoot();
+    const selection = window.getSelection();
+    if (!content || !selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+    const range = selection.getRangeAt(0);
+    const common = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+      ? range.commonAncestorContainer
+      : range.commonAncestorContainer.parentElement;
+    if (!common || !content.contains(common)) return null;
+    const text = selection.toString().trim();
+    if (!text) return null;
+    return { content, selection, range, text };
+  }
+
+  function rangeStartsInsideHighlight(range) {
+    const startNode = range.startContainer.nodeType === Node.ELEMENT_NODE
+      ? range.startContainer
+      : range.startContainer.parentElement;
+    return !!startNode?.closest?.('mark.user-highlight');
+  }
+
+  function computeRangeOffsets(content, range) {
+    const prior = range.cloneRange();
+    prior.selectNodeContents(content);
+    prior.setEnd(range.startContainer, range.startOffset);
+    return {
+      start: prior.toString().length,
+      length: range.toString().length,
+    };
+  }
+
+  function createRangeFromOffsets(content, start, length) {
+    if (start < 0 || length <= 0) return null;
+    const end = start + length;
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+    let node;
+    let offset = 0;
+    let startNode = null;
+    let startOffset = 0;
+    let endNode = null;
+    let endOffset = 0;
+
+    while ((node = walker.nextNode())) {
+      const nodeLength = (node.nodeValue || '').length;
+      const nextOffset = offset + nodeLength;
+
+      if (!startNode && start >= offset && start < nextOffset) {
+        startNode = node;
+        startOffset = start - offset;
+      }
+      if (!endNode && end > offset && end <= nextOffset) {
+        endNode = node;
+        endOffset = end - offset;
+      }
+      if (startNode && endNode) break;
+      offset = nextOffset;
+    }
+
+    if (!startNode || !endNode) return null;
+    const range = document.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    return range;
+  }
+
+  function wrapRangeWithHighlight(range, id, comment) {
+    if (range.collapsed) return false;
+    const mark = document.createElement('mark');
+    mark.className = 'user-highlight';
+    mark.dataset.highlightId = id;
+    if (comment) mark.title = comment;
+    try {
+      range.surroundContents(mark);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function applyHighlightsForCurrentPage(pageOverride) {
+    const content = getCurrentContentRoot();
+    if (!content) return;
+    const page = pageOverride || getCurrentPage();
+    const entries = getStoredHighlights().filter(entry => entry.page === page);
+    entries.forEach(entry => {
+      if (!entry || typeof entry.start !== 'number' || typeof entry.length !== 'number') return;
+      if (content.querySelector('mark.user-highlight[data-highlight-id="' + entry.id + '"]')) return;
+      const range = createRangeFromOffsets(content, entry.start, entry.length);
+      if (!range || range.collapsed) return;
+      if (rangeStartsInsideHighlight(range)) return;
+      wrapRangeWithHighlight(range, entry.id, entry.comment || '');
+    });
+  }
+
+  function hideHighlightMenu() {
+    if (!highlightMenu) return;
+    highlightMenu.hidden = true;
+    highlightMenu.removeAttribute('data-visible');
+  }
+
+  function saveCurrentSelectionHighlight(withComment) {
+    const selected = getSelectionInContent();
+    if (!selected || rangeStartsInsideHighlight(selected.range)) {
+      hideHighlightMenu();
+      return;
+    }
+    const offsets = computeRangeOffsets(selected.content, selected.range);
+    const comment = withComment ? window.prompt('Add a comment for this highlight:') : '';
+    if (withComment && comment === null) {
+      hideHighlightMenu();
+      return;
+    }
+
+    const id = 'hl-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    if (!wrapRangeWithHighlight(selected.range, id, (comment || '').trim())) {
+      hideHighlightMenu();
+      return;
+    }
+
+    const entries = getStoredHighlights();
+    entries.push({
+      id,
+      page: getCurrentPage(),
+      start: offsets.start,
+      length: offsets.length,
+      comment: (comment || '').trim(),
+    });
+    saveStoredHighlights(entries);
+    selected.selection.removeAllRanges();
+    hideHighlightMenu();
+  }
+
+  function buildHighlightMenu() {
+    const menu = document.createElement('div');
+    menu.id = 'selection-menu';
+    menu.hidden = true;
+
+    const commentBtn = document.createElement('button');
+    commentBtn.type = 'button';
+    commentBtn.textContent = 'Add comment';
+    commentBtn.addEventListener('click', () => saveCurrentSelectionHighlight(true));
+
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.textContent = 'Save highlight';
+    saveBtn.addEventListener('click', () => saveCurrentSelectionHighlight(false));
+
+    menu.appendChild(commentBtn);
+    menu.appendChild(saveBtn);
+    return menu;
+  }
+
+  function positionHighlightMenu(range) {
+    if (!highlightMenu) return;
+    const rect = range.getBoundingClientRect();
+    if (!rect || (rect.width === 0 && rect.height === 0)) {
+      hideHighlightMenu();
+      return;
+    }
+
+    highlightMenu.hidden = false;
+    highlightMenu.setAttribute('data-visible', 'true');
+    const menuWidth = highlightMenu.offsetWidth || 180;
+    const top = Math.max(8, rect.bottom + window.scrollY + 8);
+    const left = Math.min(
+      Math.max(8, rect.left + window.scrollX),
+      window.scrollX + window.innerWidth - menuWidth - 8
+    );
+    highlightMenu.style.top = top + 'px';
+    highlightMenu.style.left = left + 'px';
+  }
+
+  function maybeShowHighlightMenu() {
+    const selected = getSelectionInContent();
+    if (!selected || rangeStartsInsideHighlight(selected.range)) {
+      hideHighlightMenu();
+      return;
+    }
+    positionHighlightMenu(selected.range);
   }
 
   function buildSearchRegex(query, options) {
@@ -543,6 +743,7 @@
 
     if (href === 'index.html') {
       mainContent.innerHTML = homeHTML;
+      applyHighlightsForCurrentPage('index.html');
       window.scrollTo(0, 0);
       if (pushState) history.pushState({ page: 'index.html' }, '', window.location.pathname);
       setActiveLink('index.html');
@@ -561,6 +762,7 @@
         }
       }
       applySearchToCurrentPage();
+      applyHighlightsForCurrentPage(href);
       if (pushState) history.pushState({ page: href }, '', '?page=' + href);
       setActiveLink(href);
     } catch (err) {
@@ -673,9 +875,24 @@
     }
   });
 
+  document.addEventListener('selectionchange', () => {
+    if (!highlightMenu || !highlightMenu.hidden) return;
+    maybeShowHighlightMenu();
+  });
+
+  document.addEventListener('mousedown', e => {
+    if (!highlightMenu || highlightMenu.hidden) return;
+    if (highlightMenu.contains(e.target)) return;
+    hideHighlightMenu();
+  });
+
+  document.addEventListener('scroll', hideHighlightMenu, { passive: true });
+
   document.addEventListener('DOMContentLoaded', () => {
     document.body.prepend(buildSidebar());
     document.body.prepend(buildMobileBar());
+    highlightMenu = buildHighlightMenu();
+    document.body.appendChild(highlightMenu);
 
     // Save home HTML before any navigation
     homeHTML = document.getElementById('main-content').innerHTML;
@@ -686,6 +903,7 @@
       loadPage(initialPage, false);
     } else {
       setActiveLink('index.html');
+      applyHighlightsForCurrentPage('index.html');
     }
 
     prefetchAllPages().catch(() => {});
