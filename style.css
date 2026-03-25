@@ -260,11 +260,33 @@ mark.user-highlight {
   color: #111;
   border-radius: 2px;
   padding: 0 0.08em;
+  position: relative;
 }
 
 :root.light mark.user-highlight {
   background: #90e7ff;
   color: #111;
+}
+
+mark.user-highlight[data-comment]:hover::after,
+mark.user-highlight[data-comment]:focus-visible::after {
+  content: attr(data-comment);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
+  min-width: 140px;
+  max-width: 320px;
+  white-space: normal;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+  z-index: 15;
 }
 
 #selection-menu {
@@ -277,6 +299,10 @@ mark.user-highlight {
   border-radius: 8px;
   background: var(--surface);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+#selection-menu[hidden] {
+  display: none !important;
 }
 
 #selection-menu button {
