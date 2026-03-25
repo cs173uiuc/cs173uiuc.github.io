@@ -176,7 +176,7 @@
       mark.title = comment;
       mark.dataset.comment = comment;
       mark.setAttribute('aria-label', comment);
-      mark.tabIndex = 0;
+      mark.tabIndex = -1;
     }
     try {
       range.surroundContents(mark);
