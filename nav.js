@@ -172,7 +172,12 @@
     const mark = document.createElement('mark');
     mark.className = 'user-highlight';
     mark.dataset.highlightId = id;
-    if (comment) mark.title = comment;
+    if (comment) {
+      mark.title = comment;
+      mark.dataset.comment = comment;
+      mark.setAttribute('aria-label', comment);
+      mark.tabIndex = -1;
+    }
     try {
       range.surroundContents(mark);
       return true;
