@@ -231,6 +231,13 @@
     unwrapHighlight(mark);
   }
 
+  function maybeRemoveHoveredHighlight(target) {
+    if (!(target instanceof Element)) return;
+    const highlight = target.closest('mark.user-highlight');
+    if (!highlight) return;
+    removeHoveredHighlight(highlight);
+  }
+
   function hideHighlightMenu() {
     if (!highlightMenu) return;
     highlightMenu.hidden = true;
@@ -932,19 +939,17 @@
 
   document.addEventListener('scroll', hideHighlightMenu, { passive: true });
 
-  document.addEventListener('mouseover', e => {
-    const target = e.target;
-    const sourceElement = target instanceof Element ? target : target?.parentElement;
-    const highlight = sourceElement?.closest?.('mark.user-highlight');
-    if (!highlight) return;
-    removeHoveredHighlight(highlight);
-  });
-
   document.addEventListener('DOMContentLoaded', () => {
     document.body.prepend(buildSidebar());
     document.body.prepend(buildMobileBar());
     highlightMenu = buildHighlightMenu();
     document.body.appendChild(highlightMenu);
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.addEventListener('mouseover', e => {
+        maybeRemoveHoveredHighlight(e.target);
+      });
+    }
 
     // Save home HTML before any navigation
     homeHTML = document.getElementById('main-content').innerHTML;
