@@ -204,6 +204,33 @@
     });
   }
 
+  function removeStoredHighlight(id) {
+    const entryId = String(id || '');
+    if (!entryId) return;
+    const entries = getStoredHighlights();
+    const filtered = entries.filter(entry => String(entry?.id || '') !== entryId);
+    if (filtered.length !== entries.length) {
+      saveStoredHighlights(filtered);
+    }
+  }
+
+  function unwrapHighlight(mark) {
+    const parent = mark.parentNode;
+    if (!parent) return;
+    while (mark.firstChild) {
+      parent.insertBefore(mark.firstChild, mark);
+    }
+    parent.removeChild(mark);
+    parent.normalize();
+  }
+
+  function removeHoveredHighlight(mark) {
+    if (!(mark instanceof HTMLElement) || !mark.matches('mark.user-highlight')) return;
+    removeStoredHighlight(mark.dataset.highlightId);
+    hideHighlightMenu();
+    unwrapHighlight(mark);
+  }
+
   function hideHighlightMenu() {
     if (!highlightMenu) return;
     highlightMenu.hidden = true;
@@ -904,6 +931,14 @@
   });
 
   document.addEventListener('scroll', hideHighlightMenu, { passive: true });
+
+  document.addEventListener('mouseover', e => {
+    const target = e.target;
+    const sourceElement = target instanceof Element ? target : target?.parentElement;
+    const highlight = sourceElement?.closest?.('mark.user-highlight');
+    if (!highlight) return;
+    removeHoveredHighlight(highlight);
+  });
 
   document.addEventListener('DOMContentLoaded', () => {
     document.body.prepend(buildSidebar());
