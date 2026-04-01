@@ -204,6 +204,40 @@
     });
   }
 
+  function removeStoredHighlight(id) {
+    const entryId = String(id || '');
+    if (!entryId) return;
+    const entries = getStoredHighlights();
+    const filtered = entries.filter(entry => String(entry?.id || '') !== entryId);
+    if (filtered.length !== entries.length) {
+      saveStoredHighlights(filtered);
+    }
+  }
+
+  function unwrapHighlight(mark) {
+    const parent = mark.parentNode;
+    if (!parent) return;
+    while (mark.firstChild) {
+      parent.insertBefore(mark.firstChild, mark);
+    }
+    parent.removeChild(mark);
+    parent.normalize();
+  }
+
+  function removeHoveredHighlight(mark) {
+    if (!(mark instanceof HTMLElement) || !mark.matches('mark.user-highlight')) return;
+    removeStoredHighlight(mark.dataset.highlightId);
+    hideHighlightMenu();
+    unwrapHighlight(mark);
+  }
+
+  function maybeRemoveHoveredHighlight(target) {
+    if (!(target instanceof Element)) return;
+    const highlight = target.closest('mark.user-highlight');
+    if (!highlight) return;
+    removeHoveredHighlight(highlight);
+  }
+
   function hideHighlightMenu() {
     if (!highlightMenu) return;
     highlightMenu.hidden = true;
@@ -910,6 +944,12 @@
     document.body.prepend(buildMobileBar());
     highlightMenu = buildHighlightMenu();
     document.body.appendChild(highlightMenu);
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.addEventListener('mouseover', e => {
+        maybeRemoveHoveredHighlight(e.target);
+      });
+    }
 
     // Save home HTML before any navigation
     homeHTML = document.getElementById('main-content').innerHTML;
