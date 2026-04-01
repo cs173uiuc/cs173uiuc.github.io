@@ -44,6 +44,9 @@
   let searchControls = null;
   const highlightStorageKey = 'cs173-highlights';
   let highlightMenu = null;
+  let highlightHoverMenu = null;
+  let activeHoveredHighlight = null;
+  let hoverMenuHideTimer = null;
   let highlightIdCounter = 0;
 
   function getCurrentPage() {
@@ -228,20 +231,36 @@
     if (!(mark instanceof HTMLElement) || !mark.matches('mark.user-highlight')) return;
     removeStoredHighlight(mark.dataset.highlightId);
     hideHighlightMenu();
+    hideHighlightHoverMenu();
     unwrapHighlight(mark);
-  }
-
-  function maybeRemoveHoveredHighlight(target) {
-    if (!(target instanceof Element)) return;
-    const highlight = target.closest('mark.user-highlight');
-    if (!highlight) return;
-    removeHoveredHighlight(highlight);
   }
 
   function hideHighlightMenu() {
     if (!highlightMenu) return;
     highlightMenu.hidden = true;
     highlightMenu.removeAttribute('data-visible');
+  }
+
+  function clearHoverMenuHideTimer() {
+    if (hoverMenuHideTimer) {
+      clearTimeout(hoverMenuHideTimer);
+      hoverMenuHideTimer = null;
+    }
+  }
+
+  function hideHighlightHoverMenu() {
+    clearHoverMenuHideTimer();
+    activeHoveredHighlight = null;
+    if (!highlightHoverMenu) return;
+    highlightHoverMenu.hidden = true;
+    highlightHoverMenu.removeAttribute('data-visible');
+  }
+
+  function scheduleHideHighlightHoverMenu() {
+    clearHoverMenuHideTimer();
+    hoverMenuHideTimer = window.setTimeout(() => {
+      hideHighlightHoverMenu();
+    }, 120);
   }
 
   function saveCurrentSelectionHighlight(withComment) {
@@ -296,6 +315,32 @@
     return menu;
   }
 
+  function buildHighlightHoverMenu() {
+    const menu = document.createElement('div');
+    menu.id = 'highlight-hover-menu';
+    menu.hidden = true;
+
+    const note = document.createElement('span');
+    note.className = 'hover-note';
+    menu.appendChild(note);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'trash-btn';
+    deleteBtn.setAttribute('aria-label', 'Delete highlight');
+    deleteBtn.textContent = '\ud83d\uddd1\ufe0f';
+    deleteBtn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (activeHoveredHighlight) removeHoveredHighlight(activeHoveredHighlight);
+    });
+    menu.appendChild(deleteBtn);
+
+    menu.addEventListener('pointerenter', clearHoverMenuHideTimer);
+    menu.addEventListener('pointerleave', scheduleHideHighlightHoverMenu);
+    return menu;
+  }
+
   function positionHighlightMenu(range) {
     if (!highlightMenu) return;
     const rect = range.getBoundingClientRect();
@@ -314,6 +359,33 @@
     );
     highlightMenu.style.top = top + 'px';
     highlightMenu.style.left = left + 'px';
+  }
+
+  function showHighlightHoverMenu(mark) {
+    if (!highlightHoverMenu || !(mark instanceof HTMLElement) || !mark.matches('mark.user-highlight')) return;
+    clearHoverMenuHideTimer();
+    activeHoveredHighlight = mark;
+
+    const note = highlightHoverMenu.querySelector('.hover-note');
+    const comment = (mark.dataset.comment || '').trim();
+    if (note) {
+      note.textContent = comment;
+      note.hidden = !comment;
+    }
+
+    highlightHoverMenu.hidden = false;
+    highlightHoverMenu.setAttribute('data-visible', 'true');
+
+    const rect = mark.getBoundingClientRect();
+    const menuWidth = highlightHoverMenu.offsetWidth || 180;
+    const menuHeight = highlightHoverMenu.offsetHeight || 36;
+    const top = Math.max(8, rect.top + window.scrollY - menuHeight - 8);
+    const left = Math.min(
+      Math.max(8, rect.left + window.scrollX),
+      window.scrollX + window.innerWidth - menuWidth - 8
+    );
+    highlightHoverMenu.style.top = top + 'px';
+    highlightHoverMenu.style.left = left + 'px';
   }
 
   function maybeShowHighlightMenu() {
@@ -937,17 +1009,39 @@
     hideHighlightMenu();
   });
 
-  document.addEventListener('scroll', hideHighlightMenu, { passive: true });
+  document.addEventListener('mousedown', e => {
+    if (!highlightHoverMenu || highlightHoverMenu.hidden) return;
+    if (highlightHoverMenu.contains(e.target)) return;
+    const withinHighlight = e.target instanceof Element && e.target.closest('mark.user-highlight');
+    if (withinHighlight) return;
+    hideHighlightHoverMenu();
+  });
+
+  document.addEventListener('scroll', () => {
+    hideHighlightMenu();
+    hideHighlightHoverMenu();
+  }, { passive: true });
 
   document.addEventListener('DOMContentLoaded', () => {
     document.body.prepend(buildSidebar());
     document.body.prepend(buildMobileBar());
     highlightMenu = buildHighlightMenu();
     document.body.appendChild(highlightMenu);
+    highlightHoverMenu = buildHighlightHoverMenu();
+    document.body.appendChild(highlightHoverMenu);
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
-      mainContent.addEventListener('mouseover', e => {
-        maybeRemoveHoveredHighlight(e.target);
+      mainContent.addEventListener('pointerover', e => {
+        const highlight = e.target instanceof Element ? e.target.closest('mark.user-highlight') : null;
+        if (!highlight) return;
+        showHighlightHoverMenu(highlight);
+      });
+      mainContent.addEventListener('pointerout', e => {
+        const fromHighlight = e.target instanceof Element ? e.target.closest('mark.user-highlight') : null;
+        if (!fromHighlight) return;
+        const to = e.relatedTarget;
+        if (to instanceof Element && (fromHighlight.contains(to) || highlightHoverMenu?.contains(to))) return;
+        scheduleHideHighlightHoverMenu();
       });
     }
 
