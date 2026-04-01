@@ -43,6 +43,7 @@
   let activeHitIndex = -1;
   let searchControls = null;
   const highlightStorageKey = 'cs173-highlights';
+  const HOVER_MENU_HIDE_DELAY_MS = 120;
   let highlightMenu = null;
   let highlightHoverMenu = null;
   let activeHoveredHighlight = null;
@@ -260,7 +261,7 @@
     clearHoverMenuHideTimer();
     hoverMenuHideTimer = window.setTimeout(() => {
       hideHighlightHoverMenu();
-    }, 120);
+    }, HOVER_MENU_HIDE_DELAY_MS);
   }
 
   function saveCurrentSelectionHighlight(withComment) {
@@ -328,7 +329,18 @@
     deleteBtn.type = 'button';
     deleteBtn.className = 'trash-btn';
     deleteBtn.setAttribute('aria-label', 'Delete highlight');
-    deleteBtn.textContent = '\ud83d\uddd1\ufe0f';
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const trashIcon = document.createElementNS(svgNS, 'svg');
+    trashIcon.setAttribute('viewBox', '0 0 24 24');
+    trashIcon.setAttribute('width', '14');
+    trashIcon.setAttribute('height', '14');
+    trashIcon.setAttribute('aria-hidden', 'true');
+    trashIcon.setAttribute('focusable', 'false');
+    const trashPath = document.createElementNS(svgNS, 'path');
+    trashPath.setAttribute('fill', 'currentColor');
+    trashPath.setAttribute('d', 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z');
+    trashIcon.appendChild(trashPath);
+    deleteBtn.appendChild(trashIcon);
     deleteBtn.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
@@ -1003,17 +1015,17 @@
     maybeShowHighlightMenu();
   });
 
-  document.addEventListener('mousedown', e => {
+  document.addEventListener('pointerdown', e => {
     if (!highlightMenu || highlightMenu.hidden) return;
     if (highlightMenu.contains(e.target)) return;
     hideHighlightMenu();
   });
 
-  document.addEventListener('mousedown', e => {
+  document.addEventListener('pointerdown', e => {
     if (!highlightHoverMenu || highlightHoverMenu.hidden) return;
     if (highlightHoverMenu.contains(e.target)) return;
-    const withinHighlight = e.target instanceof Element && e.target.closest('mark.user-highlight');
-    if (withinHighlight) return;
+    const isWithinHighlight = e.target instanceof Element && e.target.closest('mark.user-highlight');
+    if (isWithinHighlight) return;
     hideHighlightHoverMenu();
   });
 
@@ -1040,7 +1052,8 @@
         const fromHighlight = e.target instanceof Element ? e.target.closest('mark.user-highlight') : null;
         if (!fromHighlight) return;
         const to = e.relatedTarget;
-        if (to instanceof Element && (fromHighlight.contains(to) || highlightHoverMenu?.contains(to))) return;
+        const inHoverMenu = !!highlightHoverMenu && to instanceof Element && highlightHoverMenu.contains(to);
+        if (to instanceof Element && (fromHighlight.contains(to) || inHoverMenu)) return;
         scheduleHideHighlightHoverMenu();
       });
     }
