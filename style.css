@@ -5,6 +5,7 @@
   --text:    #e6edf3;
   --heading: #f0f6fc;
   --accent:  #58a6ff;
+  --danger:  #d9534f;
   --muted:   #8b949e;
   --border:  #30363d;
   --sidebar-width: 260px;
@@ -15,6 +16,7 @@
   --text:    #24292f;
   --heading: #1f2328;
   --accent:  #0969da;
+  --danger:  #cf222e;
   --muted:   #57606a;
   --border:  #d0d7de;
 }
@@ -342,8 +344,8 @@ mark.user-highlight {
 }
 
 #highlight-hover-menu .trash-btn:hover {
-  border-color: #d9534f;
-  color: #d9534f;
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 #sidebar-nav { padding: 0.75rem 0; flex: 1; }

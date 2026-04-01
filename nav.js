@@ -43,7 +43,7 @@
   let activeHitIndex = -1;
   let searchControls = null;
   const highlightStorageKey = 'cs173-highlights';
-  const HOVER_MENU_HIDE_DELAY_MS = 120;
+  const HOVER_HIDE_DELAY_MS = 120;
   let highlightMenu = null;
   let highlightHoverMenu = null;
   let activeHoveredHighlight = null;
@@ -230,7 +230,8 @@
 
   function removeHoveredHighlight(mark) {
     if (!(mark instanceof HTMLElement) || !mark.matches('mark.user-highlight')) return;
-    removeStoredHighlight(mark.dataset.highlightId);
+    const highlightId = (mark.dataset.highlightId || '').trim();
+    if (highlightId) removeStoredHighlight(highlightId);
     hideHighlightMenu();
     hideHighlightHoverMenu();
     unwrapHighlight(mark);
@@ -261,7 +262,7 @@
     clearHoverMenuHideTimer();
     hoverMenuHideTimer = window.setTimeout(() => {
       hideHighlightHoverMenu();
-    }, HOVER_MENU_HIDE_DELAY_MS);
+    }, HOVER_HIDE_DELAY_MS);
   }
 
   function saveCurrentSelectionHighlight(withComment) {
@@ -1051,9 +1052,9 @@
       mainContent.addEventListener('pointerout', e => {
         const fromHighlight = e.target instanceof Element ? e.target.closest('mark.user-highlight') : null;
         if (!fromHighlight) return;
-        const to = e.relatedTarget;
-        const inHoverMenu = !!highlightHoverMenu && to instanceof Element && highlightHoverMenu.contains(to);
-        if (to instanceof Element && (fromHighlight.contains(to) || inHoverMenu)) return;
+        const relatedTarget = e.relatedTarget;
+        const inHoverMenu = !!highlightHoverMenu && relatedTarget instanceof Element && highlightHoverMenu.contains(relatedTarget);
+        if (relatedTarget instanceof Element && (fromHighlight.contains(relatedTarget) || inHoverMenu)) return;
         scheduleHideHighlightHoverMenu();
       });
     }
