@@ -5,6 +5,7 @@
   --text:    #e6edf3;
   --heading: #f0f6fc;
   --accent:  #58a6ff;
+  --danger:  #d9534f;
   --muted:   #8b949e;
   --border:  #30363d;
   --sidebar-width: 260px;
@@ -15,6 +16,7 @@
   --text:    #24292f;
   --heading: #1f2328;
   --accent:  #0969da;
+  --danger:  #cf222e;
   --muted:   #57606a;
   --border:  #d0d7de;
 }
@@ -268,27 +270,6 @@ mark.user-highlight {
   color: #111;
 }
 
-mark.user-highlight[data-comment]:hover::after,
-mark.user-highlight[data-comment]:focus-visible::after {
-  content: attr(data-comment);
-  position: absolute;
-  left: 0;
-  bottom: calc(100% + 6px);
-  min-width: 140px;
-  max-width: 320px;
-  white-space: normal;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--text);
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 0.72rem;
-  line-height: 1.25;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
-  z-index: 15;
-}
-
 #selection-menu {
   position: absolute;
   z-index: 300;
@@ -319,6 +300,52 @@ mark.user-highlight[data-comment]:focus-visible::after {
 #selection-menu button:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+#highlight-hover-menu {
+  position: absolute;
+  z-index: 320;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+#highlight-hover-menu[hidden] {
+  display: none !important;
+}
+
+#highlight-hover-menu .hover-note {
+  max-width: 320px;
+  white-space: normal;
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+#highlight-hover-menu .trash-btn {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 6px;
+  width: 1.7rem;
+  height: 1.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 0.86rem;
+}
+
+#highlight-hover-menu .trash-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 #sidebar-nav { padding: 0.75rem 0; flex: 1; }
